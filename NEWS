@@ -14,7 +14,8 @@ all functions are stored in the folder lib. at this stage we have kept version 1
 CHANGES
 beam.r
 1. data folder introduced containing "THE LIST" used by beam.r
-2. a front end section is created in beam.r to set the working directory dynamically, load the lists, and set the global variables. this includes the introduction of variable THISYEAR which is the assessment year (e.g. 2025 for monitoring data collected in 2024).
+2. a front end section is created in beam.r to set the working directory dynamically (calling function lib/set_WE.r): 
+    load the lists, and set the global variables. this includes the introduction of variable THISYEAR which is the assessment year (e.g. 2025 for monitoring data collected in 2024).
 3. created results folder to store results
 4. remove local addresses for function and data files
 5.change country ISO code to 3-letter to avoid homonyms with functions (eg "de" and "se")
