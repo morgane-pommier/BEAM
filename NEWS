@@ -1,0 +1,32 @@
+/ihere we store the updates done as we progress through different versions
+
+# VERSION 2.0 June 2025
+INTRODUCTION
+Under the auspice of the CIBBRiNA project, Ailbhe Kavanagh, Morgane Pommier, Outi Tervo and David Lusseau met in June to continue to streamline the BEAM code. 
+We built on the excellent work to bring the functions developed in earlier sessions (particular kudos to Andre Moan for the hard work structuring the code developed by the BEAM team in a R proto-package).
+
+in this version 2.0 the main function is beam.r. It starts from D1, D2, D3 and uses fixed metadata stored in the new folder data and ends with the production of figures and tables as seen in ICES WGBYC reports from 2023 in a folder results.
+Note that as of July 4th, the last step (data visualisation) still needs some work at the start to produce the two data tables needed as input from the data produced by the upstream component of the anlaytical pipeline.
+It is just a merger step needed and will be completed soon.
+
+all functions are stored in the folder lib. at this stage we have kept version 1.0 of the functions that were altered and kept them as v1.r files (the same applies to beamv1.r). this will be tidied up after ICES WGBYC 2025.
+
+CHANGES
+beam.r
+1. data folder introduced containing "THE LIST" used by beam.r
+2. a front end section is created in beam.r to set the working directory dynamically, load the lists, and set the global variables. this includes the introduction of variable THISYEAR which is the assessment year (e.g. 2025 for monitoring data collected in 2024).
+3. created results folder to store results
+4. remove local addresses for function and data files
+5.change country ISO code to 3-letter to avoid homonyms with functions (eg "de" and "se")
+6. added the table and figure productio ncode to beam and saving to results folder
+
+generate_the_list.r
+1. changed fread to retrieve global varaibles (THE LIST) read in beam.r instead
+2. round up n_individual after joining to ensure that n_individual is an integer (number of individuals). fractions occur when the number of indviduals is estimated from biomass sampling.
+
+clean.data.r
+1. change sys.time call to retrieve THISYEAR global variable set in beam.r instead
+2. add a QC step to ensure that any "-9" are assigned <NA> (some still remained)
+
+add_vessel_lenght_groups
+1. some issues remained with typos in data with mixtures of lower and upper caps for letters. the vessel vategories are all set to lower and the matching is done to lower(vessellength) in the data: data remains unchanged, only the matching is done to lowered vessellength.
