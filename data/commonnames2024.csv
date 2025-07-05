@@ -1,0 +1,151 @@
+species,common,taxon
+acipenser oxyrinchus,Atlantic sturgeon,Fish
+alosa alosa,Alice shad,Fish
+alosa fallax,Twaite shad,Fish
+amblyraja hyperborea,Arctic skate,Fish
+amblyraja radiata,thorny skate,Fish
+anarhichas denticulatus,northern wolffish,Fish
+anarhichas lupus,Atlantic wolffish,Fish
+anarhichas minor,spotted wolffish,Fish
+bodianus scrofa,barred hogfish,Fish
+brama brama,Atlantic pomfret,Fish
+caretta caretta,Loggerhead,Turtles
+centroscyllium fabricii,black dogfish,Fish
+centroscymnus crepidater,longnose velvet dogfish,
+chelidonichthys lucerna,tub gurnard,Fish
+chimaera monstrosa,rabbitfish,Fish
+chlamydoselachus anguineus,frill shark,Fish
+conger conger,conger eel,Fish
+cyclopterus lumpus,lumpfish,Fish
+dasyatis pastinaca,blue stingray,Fish
+deania calcea,birdbeak dogfish,
+delphinus delphis,Short-beaked Common Dolphin,Mammals
+dermochelys coriacea,leatherback turtle,Turtles
+dipturus intermedius,flapper skate,Fish
+dipturus nidarosiensis,Norwegian skate,Fish
+dipturus oxyrinchus,longnosed skate,Fish
+epigonus telescopus,telescope cardinal,Fish
+epinephelus marginatus,dusky grouper,Fish
+etmopterus princeps,great lanternshark,Fish
+etmopterus spinax,velvet belly,Fish
+fulmarus glacialis,Northern Fulmar,Seabirds
+galeus melastomus,blackmouth catshark,Fish
+halichoerus grypus,Gray Seal,Mammals
+helicolenus dactylopterus,blackbelly rosefish,Fish
+hexanchus griseus,bluntnose sixgill shark,Fish
+hippocampus guttulatus,long-snouted seahorse,Fish
+hippoglossus hippoglossus,Atlantic halibut,Fish
+isurus paucus,longfin mako,
+labrus bergylta,ballan wrasse,Fish
+lampetra fluviatilis,European river lamprey,Fish
+larus argentatus,Herring Gull,Seabirds
+larus fuscus,Lesser Black-backed Gull,Seabirds
+larus marinus,Great Black-backed Gull,Seabirds
+lepidopus caudatus,scabbardfish,Fish
+lepidorhombus whiffiagonis,megrim,Fish
+leucoraja fullonica,shagreen ray,Fish
+lophius piscatorius,anglerfish,Fish
+lycodes esmarkii,Esmark's eelpout,Fish
+merlangius merlangus,whiting,Fish
+mola mola,ocean sunfish,Fish
+molva macrophthalma,Mediterranean ling,Fish
+mora moro,googly-eyed cod,Fish
+morus bassanus,Northern Gannet,Seabirds
+mycteroperca fusca,island grouper,Fish
+myliobatis aquila,spotted eagle ray,Fish
+pagellus bogaraveo,blackspot seabream,
+petromyzon marinus,sea lamprey,Fish
+phoca vitulina,Harbor Seal,Mammals
+phocoena phocoena,Harbor Porpoise,Mammals
+polyprion americanus,wreckfish,Fish
+pomatomus saltatrix,bluefish,Fish
+pomatoschistus microps,common goby,Fish
+pomatoschistus minutus,freckled goby,Fish
+puffinus mauretanicus,Balearic Shearwater,Seabirds
+raja clavata,thornback ray,Fish
+raja microocellata,painted ray,Fish
+raja undulata,undulate ray,Fish
+rajella fyllae,round skate,Fish
+rajella lintea,sailray,Fish
+rissa tridactyla,Black-legged Kittiwake,Seabirds
+scophthalmus maximus,turbot,Fish
+scophthalmus rhombus,brill,Fish
+scyliorhinus stellaris,nursehound,Fish
+sebastes norvegicus,golden redfish,Fish
+sebastes viviparus,Norway haddock,Fish
+somniosus microcephalus,Greenland shark,Fish
+sparus aurata,gilthead seabream,Fish
+sphyrna zygaena,smooth hammerhead,Fish
+tetronarce nobiliana,Atlantic torpedo,Fish
+torpedo marmorata,marbled electric ray,Fish
+uria aalge,Common Guillemot,Seabirds
+zeus faber,European john dory,Fish
+zoarces viviparus,viviporous blenny,Fish
+acipenser naccarii,Adriatic sturgeon,Fish
+acipenser stellatus,stellate sturgeon,Fish
+alca torda,Razorbill,Seabirds
+alepocephalus bairdii,Baird's smoothhead,Fish
+apristurus laurussonii,Iceland catshark,Fish
+argyrosomus regius,atlantic shadefish,Fish
+aythya fuligula,Tufted Duck,Seabirds
+aythya marila,Greater Scaup,Seabirds
+calonectris diomedea,Cory's Shearwater,Seabirds
+centrophorus granulosus,gulper shark,Fish
+cepphus grylle,Black Guillemot,Seabirds
+cetorhinus maximus,basking shark,Fish
+chelonia mydas,Green Sea Turtle,Turtles
+clangula hyemalis,Long-tailed Duck,Seabirds
+dipturus batis,blue skate,Fish
+etmopterus pusillus,smooth lanternshark,Fish
+fratercula arctica,Atlantic Puffin,Seabirds
+gavia arctica,Arctic Loon,Seabirds
+gavia immer,Common Loon,Seabirds
+gavia stellata,Red-throated Loon,Seabirds
+globicephala melas,Long-finned Pilot Whale,Mammals
+grampus griseus,Risso's Dolphin,Mammals
+gymnura altavela,spiny butterfly ray,Fish
+hippocampus hippocampus,seahorse,Fish
+huso huso,European sturgeon,Fish
+ichthyaetus melanocephalus,Mediterranean Gull,Seabirds
+lagenorhynchus albirostris,White-beaked Dolphin,Mammals
+larus michahellis,Yellow-legged Gull,Seabirds
+leucoraja circularis,cuckoo ray,Fish
+megaptera novaeangliae,Humpback Whale,Mammals
+melanitta fusca,Velvet Scoter,Seabirds
+melanitta nigra,Black Scoter,Seabirds
+mergus serrator,Red-breasted Merganser,Seabirds
+monachus monachus,Mediterranean Monk Seal,Mammals
+oxynotus centrina,angular roughshark,Fish
+pagophilus groenlandicus,Harp Seal,Mammals
+phalacrocorax aristotelis,European Shag,Seabirds
+phalacrocorax carbo,Great Cormorant,Seabirds
+podiceps cristatus,Great Crested Grebe,Seabirds
+podiceps grisegena,Red-necked Grebe,Seabirds
+pollachius pollachius,pollack,Fish
+puffinus gravis,Greater Shearwater,Seabirds
+puffinus griseus,Sooty Shearwater,Seabirds
+puffinus yelkouan,Yelkouan Shearwater,Seabirds
+pusa hispida,Ringed Seal,Mammals
+rajella bathyphila,deepwater ray,Fish
+rhinochimaera atlantica,knifenose chimaera,Fish
+sciaena umbra,sea raven,Fish
+scorpaena scrofa,bigscale scorpionfish,Fish
+scyliorhinus canicula,small-spotted catshark,Fish
+scymnodon ringens,knifetooth dogfish,Fish
+sebastes mentella,deepwater redfish,Fish
+somateria mollissima,Common Eider,Seabirds
+squatina aculeata,sawback angelshark,Fish
+squatina squatina,angelfish,Fish
+stenella coeruleoalba,Striped Dolphin,Mammals
+stercorarius skua,Great Skua,Seabirds
+synaphobranchus kaupii,northern cutthroat eel,Fish
+torpedo torpedo,eyed electric ray,Fish
+tursiops truncatus,Bottlenose Dolphin,Mammals
+umbrina cirrosa,corb,Fish
+uria lomvia,Thick-billed Murre,Seabirds
+centroselachus crepidater,Longnose velvet dogfish,Fish
+deania calceus,Birdbeak dogfish,Fish
+dentex dentex,Common dentex,Fish
+galeus murinus,Mouse catshark,Fish
+hydrolagus mirabilis,hydrolagus mirabilis,Fish
+leucoraja melitensis,Maltese skate,Fish
