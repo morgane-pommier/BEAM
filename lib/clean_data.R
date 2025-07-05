@@ -8,14 +8,17 @@ add_vessel_length_groups(all2)
 all2 <- all2[!is.na(ecoregion) & !(ecoregion %in% c("north west atlantic"))]
 
 # grab year before current year
-all2 <- all2[year == year(Sys.time())-1] # <- might want to add a setting for this.
+#all2 <- all2[year == year(Sys.time())-1] # <- might want to add a setting for this.
                                          # or at least print a message to console
                                          # saying what year of data we're using
+#Grab specific year 
+all2 <- all2[year == (THISYEAR)-1]
+
 all2$metierl6[all2$metierl6 == "-"] <- NA
 
-
-
 fwrite(all2, "data/all2.csv", sep = ";")
+
+
 
 ###
 obs2 <- copy(obs1)
@@ -44,7 +47,12 @@ bycatch2 <- bycatch2[!(monitoringmethod == "vo" & country == "ee")]
 bycatch2[ , class := classname]
 bycatch2[superclass == "reptilia" & is.na(classname), class := "reptilia"]
 bycatch2[classname %in% c("actinopteri", "holocephali", "myxini", "petromyzonti"), class := "fish"]
-bycatch2[ , n_individ := individualswithpingers + individualswithoutpingers]
-bycatch2[ , n_incident := incidentswithpingers + incidentswithoutpingers]
+
+setDT(bycatch2)[individualswithpingers < 0, individualswithpingers := NA] #minus values = NA
+setDT(bycatch2)[incidentswithpingers < 0, incidentswithpingers := NA] #minus values = NA
+
+bycatch2[ , n_individ := rowSums(.SD, na.rm = TRUE),.SDcols=c("individualswithpingers","individualswithoutpingers")] #ignore NAs when summing
+bycatch2[ , n_incident := rowSums(.SD, na.rm = TRUE),.SDcols=c("incidentswithpingers","incidentswithoutpingers")] #ignore NAs when summing
+
 fwrite(bycatch2, "data/bycatch2.csv", sep = ";")
 

@@ -15,10 +15,10 @@ bycatch3 = bycatch2[, .(n_ind = sum(n_individ, na.rm = TRUE)),
 ###
 # create list of relevant Ecoregion * species combinations  #########
 
-annex01_species <- fread("C:/Users/a21997/OneDrive - Havforskningsinstituttet/Møter/2024-09 ICES WGBYC 2024/BEAM/data/ICES_Annex_1_WGBYC_2024.csv",
-                         col.names = c("aphiaid", "species", "ecoregion", "taxon"), encoding = "Latin-1")
-mediterranean <- fread("C:/Users/a21997/OneDrive - Havforskningsinstituttet/Møter/2024-09 ICES WGBYC 2024/BEAM/data/Med_Annex_1_WGBYC_2024.csv",
-                       col.names = c("aphiaid", "species", "ecoregion", "taxon"), encoding = "Latin-1")
+#annex01_species <- fread("data/ICES_Annex_1_WGBYC_2024.csv",
+                         #col.names = c("aphiaid", "species", "ecoregion", "taxon"), encoding = "Latin-1")
+#mediterranean <- fread("data/Med_Annex_1_WGBYC_2024.csv",
+                       #col.names = c("aphiaid", "species", "ecoregion", "taxon"), encoding = "Latin-1")
 ecoreg_species = rbindlist(list(annex01_species, mediterranean))
 clean_chars(ecoreg_species) # fix misc. character issues
 ecoreg_species[, aphiaid := unique(na.omit(aphiaid))[1], species] # fill in NAs
@@ -68,6 +68,10 @@ obs3[bycatch3, on = .(ecoregion, areacode, country, year,
                       metierl4, metierl5, vessellength_group,
                       samplingprotocol, monitoringmethod, species),
      n_ind := i.n_ind]
+
+#round up number of individuals
+obs3[, n_ind := round(n_ind, 0)]
+
 
 ###
 # add a flag (taxon_bycatch_monitor_ok), to indicate whether the species bycaught

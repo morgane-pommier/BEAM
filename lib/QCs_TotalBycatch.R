@@ -39,17 +39,17 @@ monitoring <- obs2
 # Table with DaSFishing and DaSMonitored, quantitative and qualitative, per 
 #   ecoregion, metier level 4 and vessel length
 fishing_eco_metier <- fishing %>% 
-  group_by(ecoregion, metierL4, vesselLengthRange) %>% 
-  summarize(DaSFish = sum(daysAtSeaF))
+  group_by(ecoregion, metierl4, vessellength_group) %>% 
+  summarize(DaSFish = sum(daysatseaf))
 fishing_eco_metier$DaSFish_ql <- TRUE
 
 monitoring_eco_metier <- monitoring %>% 
-  group_by(ecoregion, metierL4, vesselLengthRange) %>% 
-  summarize(DaSMon = sum(daysAtSeaOb))
+  group_by(ecoregion, metierl4, vessellength_group) %>% 
+  summarize(DaSMon = sum(daysatseaob))
 monitoring_eco_metier$DaSMon_ql <- TRUE
 
 fishing_monitoring_eco_metier <- merge(fishing_eco_metier, monitoring_eco_metier,
-                                      by = c("ecoregion", "metierL4", "vesselLengthRange"),
+                                      by = c("ecoregion", "metierl4", "vessellength_group"),
                                       all = TRUE)
 
 fishing_monitoring_eco_metier$DaSFish_ql[is.na(fishing_monitoring_eco_metier$DaSFish_ql)] <- FALSE
@@ -65,8 +65,8 @@ total_bycatch$QC1 <- "green"
 for(a in 1:nrow(total_bycatch)){
   subset <- fishing_monitoring_eco_metier[fishing_monitoring_eco_metier$ecoregion %in% 
                                             total_bycatch$ecoregion[a] & 
-                                            fishing_monitoring_eco_metier$metierL4 %in% 
-                                            total_bycatch$metierL4[a], ]
+                                            fishing_monitoring_eco_metier$metierl4 %in% 
+                                            total_bycatch$metierl4[a], ]
   if(sum(subset$DaSMon, na.rm = T) >= sum(subset$DaSFish, na.rm = T)){total_bycatch$QC1[a] <- "red"}
 }
 
@@ -80,8 +80,8 @@ total_bycatch$QC2 <- "green"
 for(b in 1:nrow(total_bycatch)){
   subset <- fishing_monitoring_eco_metier[fishing_monitoring_eco_metier$ecoregion %in% 
                                            total_bycatch$ecoregion[b] & 
-                                            fishing_monitoring_eco_metier$metierL4 %in% 
-                                           total_bycatch$metierL4[b], ]
+                                            fishing_monitoring_eco_metier$metierl4 %in% 
+                                           total_bycatch$metierl4[b], ]
   if(any(subset$DaSMon_ql == TRUE & subset$DaSFish_ql == FALSE)){total_bycatch$QC2[b] <- "yellow"}else if(
     all(subset$DaSMon_ql == FALSE & subset$DaSFish_ql == FALSE)){total_bycatch$QC2[b] <- "red"}
 }
@@ -98,15 +98,15 @@ for(b in 1:nrow(total_bycatch)){
 # *tb.message reflects this
 total_bycatch$QC3 <- "green"
 for(c in 1:nrow(total_bycatch)){
-  if(total_bycatch$tb.message[c] %in% "random levels for at least one random effect not ok" &
+  if(total_bycatch$message[c] %in% "random levels for at least one random effect not ok" &
      total_bycatch$model[c] %in% "n_ind ~ 1 + (1 | year)"){total_bycatch$QC3[c] <- "yellow"}
-  if((total_bycatch$tb.message[c] %in% "random levels for at least one random effect not ok" ||
-         total_bycatch$tb.message[c] %in% "samplingProtocol or monitoringMethod not ok") &  
+  if((total_bycatch$message[c] %in% "random levels for at least one random effect not ok" ||
+         total_bycatch$message[c] %in% "samplingProtocol or monitoringMethod not ok") &  
          total_bycatch$model[c] != "n_ind ~ 1 + (1 | year)"){total_bycatch$QC3[c] <- "red"}
 }
 
 
 # Save results ------------------------------------------------------------
-write.csv(total_bycatch, "results/total_bycatch_version3_2021_2023_QCs.csv")
+write.csv(total_bycatch, "results/total_bycatch_2021_2023_QCs.csv")
 
 

@@ -23,7 +23,7 @@
 # variables that have a level "de" (it may somehow conflict with src/library/utils/R/de.R)
 # a temp fix is just to substitute de with something else in all 
 
-calc_total <- function(bpue, cols = c("ecoregion", "metierl4", "species"), obs, allx, verbose = TRUE) {
+calc_total <- function(bpue, cols = c("ecoregion", "metierl4", "species"), obs, all, verbose = TRUE) {
 
     # parallelization support
     if (nrow(bpue) > 1) {
@@ -31,13 +31,11 @@ calc_total <- function(bpue, cols = c("ecoregion", "metierl4", "species"), obs, 
                        .export = "calc_total", # <- not 100% sure this line is needed.
                        .final = rbindlist,
                        .packages = c("data.table", "glmmTMB", "emmeans", "ggeffects")) %dopar% {
-                           calc_total(bpue = bpue[i], cols = cols, obs = obs, allx = allx, verbose = FALSE)
+                           calc_total(bpue = bpue[i], cols = cols, obs = obs, all = all, verbose = FALSE)
                        }
         return(ret)
     }
     
-  
-  
     obs <- obs[bpue, on = cols]
     obs <- obs[daysatsea > 0]
     #possible_re <- c("country", "areacode", "year", "metierl5", "vessellength_group",
@@ -57,6 +55,7 @@ calc_total <- function(bpue, cols = c("ecoregion", "metierl4", "species"), obs, 
     form <- as.formula(bpue$model)
     re <- lme4::findbars(form) # random effects part of model formulation (if any)
     re <- sapply(re, function(x) as.character(x[[3]]))
+	##wow ok this findbars outcome is a list of list of length 3
     re.n <- length(re)
 
     # don't try to generate total estimates for models where either 
@@ -67,8 +66,8 @@ calc_total <- function(bpue, cols = c("ecoregion", "metierl4", "species"), obs, 
     }
     
     # sum up total fishing effort per combination of all levels of the random effects
-    tot <- allx[bpue, on = cols[cols != "species"], .(das = sum(daysatseaf)), by = re]
-    tot[, logDAS := log(das)] # OUTI: Days at sea is on a log scale
+    tot <- all[bpue, on = cols[cols != "species"], .(das = sum(daysatseaf)), by = re]
+    tot[, logDAS := log(das)]
     tot <- tot[complete.cases(tot)]
     
     if (nrow(tot) == 0) {
@@ -101,26 +100,13 @@ calc_total <- function(bpue, cols = c("ecoregion", "metierl4", "species"), obs, 
         tot[, (re) := lapply(.SD, as.factor), .SDcols = re] # Do we treat YEAR correctly here? or does year need to be exempted?
         
         pred <- lapply(1:nrow(tot), function(i) {
-          
-          if(packageVersion("ggeffects") >= "2.0.0") {  
-          
-          p <- ggpredict(model = best,
-                           terms = tot[i, ..re],
-                           condition = c(logDAS = tot$logDAS[i]),
-                           type = "random",
-                           interval = "confidence",
-                           verbose = verbose)
-         
-          }
-            
-          else { p <- ggpredict(model = best,
+            p <- ggpredict(model = best,
                            terms = tot[i, ..re],
                            condition = c(logDAS = tot$logDAS[i]),
                            type = "re",
                            interval = "confidence",
                            verbose = verbose)
             
-          }
             p <- as.data.frame(p) 
             data.table(mean = p$predicted,
                        lwr = ifelse(!is.null(p[["conf.low"]]), p[["conf.low"]], NA_real_),
