@@ -1,0 +1,7 @@
+here results data frames produced by beam.r are stored (see below) and then figures (png files) and tables (docx files) produced by visualisation step in beam.r are also stored here:
+
+1. cases_with_complete_total_bycatch
+2. cases_with_total_bycatch
+3. species_info.csv
+4. table0_DaS_ecoregion_2017_202x.csv
+5. total_bycatch_2021_202x_QCs.csv
