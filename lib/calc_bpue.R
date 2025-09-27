@@ -31,7 +31,7 @@ calc_bpue <- function(needle, cols = colnames(needle), min_re_obs = 2, dat) {
     # parallelization support
     if (nrow(needle) > 1) {
         
-        if (!is.null(BEAM_pb)) {
+        if (exists("BEAM_pb")) {
             BEAM_pb$terminate()
             BEAM_pb <<- NULL
         }
