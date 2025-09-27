@@ -32,10 +32,10 @@ clean_chars(obs2)
 add_vessel_length_groups(obs2)
 
 obs2 <- obs2[!is.na(ecoregion) & !(ecoregion %in% c("north west atlantic"))]
-obs2 <- obs2[!(monitoringmethod == "lb" & country != "pt")]
-obs2 <- obs2[!(monitoringmethod == "oth" & country != "no")]
+obs2 <- obs2[!(monitoringmethod == "lb" & country != "prt")]
+obs2 <- obs2[!(monitoringmethod == "oth" & country != "nor")]
 obs2 <- obs2[(monitoringmethod != "po")]
-obs2 <- obs2[!(monitoringmethod == "vo" & country == "ee")]
+obs2 <- obs2[!(monitoringmethod == "vo" & country == "est")]
 fwrite(obs2, "data/obs2.csv", sep = ";")
 
 ###
@@ -62,10 +62,10 @@ clean_chars(bycatch2)
 add_vessel_length_groups(bycatch2)
 
 bycatch2 <- bycatch2[!is.na(ecoregion) & !(ecoregion %in% c("north west atlantic"))]
-bycatch2 <- bycatch2[!(monitoringmethod == "lb" & country != "pt")]
-bycatch2 <- bycatch2[!(monitoringmethod == "oth" & country != "no")]
+bycatch2 <- bycatch2[!(monitoringmethod == "lb" & country != "prt")]
+bycatch2 <- bycatch2[!(monitoringmethod == "oth" & country != "nor")]
 bycatch2 <- bycatch2[(monitoringmethod != "po")]
-bycatch2 <- bycatch2[!(monitoringmethod == "vo" & country == "ee")]
+bycatch2 <- bycatch2[!(monitoringmethod == "vo" & country == "est")]
 bycatch2[ , class := classname]
 bycatch2[superclass == "reptilia" & is.na(classname), class := "reptilia"]
 bycatch2[classname %in% c("actinopteri", "holocephali", "myxini", "petromyzonti"), class := "fish"]
