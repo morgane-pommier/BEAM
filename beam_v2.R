@@ -14,7 +14,7 @@ library(this.path) # for auto-detecting the dir a script is executing out of
 library(doSNOW) # parallel computation
 library(doParallel) # parallel computation
 library(progress) # lotion for impatient minds
-
+library(this.path)
 library(stringdist) # data checking and cleaning (string manipulation)
 library(stringi)
 #library(taxize) # data cleaning
@@ -30,15 +30,16 @@ library(countrycode)
 library(stringi)
 
 
-source("lib/beam_lib.R")
-
 # Set the current WD to the path to the folder that this script is saved in
 # This lets us use relative paths throughout (rather than absolute paths).
 setwd(this.path::this.dir())
 
+source("lib/beam_lib.R")
+
+
 ### BEAN RUNNING SETTINGS
 # username - this would usually be your email 
-ices_username <- ""
+ices_username <- "davlu"
 
 # ICES data access token -
 # TODO: move this info into readme/instructions-for-use file?
@@ -49,7 +50,7 @@ ices_username <- ""
 ##### or assign it to an object eg, token<-"ewioubreuicvepb" which you can call in the function
 ##### do note the username: it should be the email (eg louis.attack@dartmouth.edu) you used to 
 ##### make the access request
-ices_token <- ""
+ices_token <- "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiZGF2bHVAYXF1YS5kdHUuZGsiLCJqdGkiOiI0YmI3ODE1ZS0zMDM1LTRmOGEtYjQyOC0xNzdjNGQyOWJhMGIiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJkYXZsdUBhcXVhLmR0dS5kayIsIlVzZXJFbWFpbCI6ImRhdmx1QGFxdWEuZHR1LmRrIiwiRW1haWwiOiJkYXZsdUBhcXVhLmR0dS5kayIsImV4cCI6MTc2MTU2NDA1MSwiaXNzIjoiaHR0cDovL3RhZi5pY2VzLmRrIiwiYXVkIjoiaHR0cDovL3RhZi5pY2VzLmRrIn0.fpbfSe7gyN5no4Wlx_ZpZLMuWwqhDTSD3hhTWFKgKGw"
 
 # years to use for estimation of BPUEs
 # by default, BEAM uses all years since 2017 and up to last year
@@ -90,7 +91,7 @@ source("lib/generate_the_list.R")
 
 eco_m4_spec <- unique(obs3[, .(ecoregion, metierl4, species)])
 
-bpue1 <- calc_bpue(eco_m4_spec[1:1000],
+bpue1 <- calc_bpue(eco_m4_spec,
                    cols = c("ecoregion", "metierl4", "species"),
                    dat = obs3)
 fwrite(bpue1, file = "data/bpue1.csv", sep = ";")
