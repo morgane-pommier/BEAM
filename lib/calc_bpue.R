@@ -33,7 +33,7 @@ calc_bpue <- function(needle, cols = colnames(needle), min_re_obs = 2, dat) {
         
         if (exists("BEAM_pb")) {
             BEAM_pb$terminate()
-            BEAM_pb <<- NULL
+            rm("BEAM_bp", envir = .GlobalEnv)
         }
         
         BEAM_pb <<- progress_bar$new(
@@ -52,7 +52,7 @@ calc_bpue <- function(needle, cols = colnames(needle), min_re_obs = 2, dat) {
                        }
         
         BEAM_pb$terminate()
-        BEAM_pb <<- NULL
+        rm("BEAM_bp", envir = .GlobalEnv)
         return(ret)
     }
 
