@@ -1,0 +1,21 @@
+# CHANGELOG
+
+WGBYC2025
+- Set BEAM up to automatically detect its working directory (it'll use the 
+  directory it's running out of), so that we can use relative paths throughout.
+  This helps make BEAM more agnostic towards the specific system it's running on.
+  
+- BEAM can now automatically download data directly from the ICES database. For this
+  to work, you have to specify the username of an account that has access, and 
+  generate a token (see more detailed instructions elsewhere).
+
+- Added a progress bar to calc_bpue(). This adds a little bit of overhead to the 
+  calculations, and if turns out that this overhead is too much, we might consider
+  removing it again. Also, this means we have to use another package, doSNOW, for
+  our parallel backend. We also needs the "progress" package.
+
+- Added a annotate_bpue function to add extra information to the table of BPUE
+  estimates
+
+- Moved code to convert 2-character country codes into 3-letter country codes into 
+  its own function clean_country_code() and put it in a separate R file. 

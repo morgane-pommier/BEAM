@@ -3,10 +3,6 @@
 # 2. results/species_info.csv                       A table of species, class, subclass and taxon (fish/seabirds/mammals/turtles)
 # 3. data/obs3.csv                                  Monitored effort data, but joined with species info
 
-
-
-
-
 obs3 = obs2[!is.na(ecoregion) & !is.na(country), .(daysatsea = sum(daysatseaob, na.rm = TRUE)),
                    by = .(ecoregion, areacode, country, year,
                           metierl4, metierl5, vessellength_group,
@@ -19,14 +15,10 @@ bycatch3 = bycatch2[, .(n_ind = sum(n_individ, na.rm = TRUE)),
 ###
 # create list of relevant Ecoregion * species combinations  #########
 
-
-annex01_species <- fread("data/ICES_Annex_1_WGBYC_2024.csv",
-                         col.names = c("aphiaid", "species", "ecoregion", "taxon"), 
-                         encoding = "Latin-1")
-mediterranean <- fread("data/Med_Annex_1_WGBYC_2025.csv",
-                       col.names = c("aphiaid", "species", "ecoregion", "taxon"), 
-                       encoding = "Latin-1")
-
+#annex01_species <- fread("data/ICES_Annex_1_WGBYC_2024.csv",
+                         #col.names = c("aphiaid", "species", "ecoregion", "taxon"), encoding = "Latin-1")
+#mediterranean <- fread("data/Med_Annex_1_WGBYC_2024.csv",
+                       #col.names = c("aphiaid", "species", "ecoregion", "taxon"), encoding = "Latin-1")
 ecoreg_species = rbindlist(list(annex01_species, mediterranean))
 clean_chars(ecoreg_species) # fix misc. character issues
 ecoreg_species[, aphiaid := unique(na.omit(aphiaid))[1], species] # fill in NAs
@@ -42,33 +34,30 @@ fwrite(x = das_per_ecoregion,
 
 
 ### 
-# Here's a block of code to check if species names contain typos
-# It's not currently run as part of the automatic part of BEAM
-# But it might be a good idea to include it as part of manual 
-# quality checks that are done on submitted data before running BEAM.
-# 
-# # first identify any species in bycatch data that aren't in the species list
-# themissing <- bycatch3[!obs3, on = "species", unique(species)] # anti-join
-# the_list_species <- unique(obs3$species)
-# 
-# ## what distance makes sense?
-# discovery.df <- data.frame(distance=c(1:max(nchar(themissing))),NAs=0)
-# for (i in 1:nrow(discovery.df)) {
-#     closematch_missing <- the_list_species[amatch(themissing, the_list_species, maxDist = discovery.df$distance[i])]
-#     discovery.df$NAs[i] <- sum(is.na(closematch_missing))
-# }
-# 
-# #plot(NAs~distance,data=discovery.df)
-# 
-# missing_match <- data.frame(missing = themissing, match = the_list_species[amatch(themissing, the_list_species, maxDist = 7)])
-# #manually rationalising only keeping those that are indeed close (homonyms or typo)
-# missing_match <- missing_match[c(32,96),]
-# 
-# ##common name introduced by accident in obs3 somewhere<w
-# #Stellate sturgeon
-# #acipenser stellatus
+# make sure species names do not contain typos
+# AM: I guess this step should probably be done manually
 
-# this
+# first identify any species in bycatch data that aren't in the species list
+themissing <- bycatch3[!obs3, on = "species", unique(species)] # anti-join
+the_list_species <- unique(obs3$species)
+
+## what distance makes sense?
+discovery.df <- data.frame(distance=c(1:max(nchar(themissing))),NAs=0)
+for (i in 1:nrow(discovery.df)) {
+    closematch_missing <- the_list_species[amatch(themissing, the_list_species, maxDist = discovery.df$distance[i])]
+    discovery.df$NAs[i] <- sum(is.na(closematch_missing))
+}
+
+#plot(NAs~distance,data=discovery.df)
+
+missing_match <- data.frame(missing = themissing, match = the_list_species[amatch(themissing, the_list_species, maxDist = 7)])
+#manually rationalising only keeping those that are indeed close (homonyms or typo)
+missing_match <- missing_match[c(32,96),]
+
+##common name introduced by accident in obs3 somewhere
+#Stellate sturgeon
+#acipenser stellatus
+
 obs3[species == "stellate sturgeon", species := "acipenser stellatus"]
 
 
@@ -138,11 +127,6 @@ obs3[,
     taxon_bycatch_monitor_ok := (taxa_monitored %in% c("all","elasmobranchs~seabirds~mammals", "protectedspecies")) | (taxa_monitored == taxon)
 ]
 
-obs3[taxon == "elasmobranchs" & taxa_monitored == "fish",
-     taxon_bycatch_monitor_ok := TRUE] #Taxon monitored is okay if fish was the protocol and they reported elasmobranchs
-
-obs3[taxon == "fish" & taxa_monitored == "elasmobranchs~seabirds~mammals",
-     taxon_bycatch_monitor_ok := FALSE] #Taxon monitored is not okay if fish were reported under elasmobranchs~seabirds~mammals
 
 fwrite(obs3, "data/obs3.csv") # previously monitor_effort_bycatch_ecoregion_area_species.csv
 

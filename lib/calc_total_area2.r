@@ -16,20 +16,28 @@
 #' @returns A data.table with all columns given in cols, and additional columns showing the model formula, bpue estimates, lower and upper confidence intervals, and a logical indicating model heterogeneity in the base model (I^2). See details.
 #' @seealso [calc_total()]
 #' @export
+#' 
+#' 
+#' 
+# There is an error in ggpredict or one of its dependencies that causes an issue with factor
+# variables that have a level "de" (it may somehow conflict with src/library/utils/R/de.R)
+# a temp fix is just to substitute de with something else in all 
 
-calc_total <- function(bpue, cols = c("ecoregion", "metierl4", "species"), obs, allx, verbose = TRUE) {
+calc_total_area2 <- function(bpue, cols = c("areacode", "metierl4", "species"), obs, allx, verbose = TRUE) {
 
     # parallelization support
     if (nrow(bpue) > 1) {
         ret <- foreach(i = 1:nrow(bpue), 
-                       .export = "calc_total", # <- not 100% sure this line is needed.
+                       .export = "calc_total_area2", # <- not 100% sure this line is needed.
                        .final = rbindlist,
                        .packages = c("data.table", "glmmTMB", "emmeans", "ggeffects")) %dopar% {
-                           calc_total(bpue = bpue[i], cols = cols, obs = obs, allx = allx, verbose = FALSE)
+                           calc_total_area2(bpue = bpue[i], cols = cols, obs = obs, allx = allx, verbose = FALSE)
                        }
         return(ret)
     }
     
+  
+  
     obs <- obs[bpue, on = cols]
     obs <- obs[daysatsea > 0]
     #possible_re <- c("country", "areacode", "year", "metierl5", "vessellength_group",
@@ -74,6 +82,12 @@ calc_total <- function(bpue, cols = c("ecoregion", "metierl4", "species"), obs, 
         return(ret)
     }
     
+    # temp fix, part 1:
+    if ("country" %in% re) {
+        obs[country == "de", country := "de_temp_fix"]
+        tot[country == "de", country := "de_temp_fix"]
+    }
+
     best <- glmmTMB(formula = form, offset = logDAS, family = nbinom2, data = obs)
 
     if (re.n == 0) {
@@ -88,8 +102,8 @@ calc_total <- function(bpue, cols = c("ecoregion", "metierl4", "species"), obs, 
 		# tot only has THISYEAR-1 data so if year %in% re then we only predict for THISYEAR-1
         
         pred <- lapply(1:nrow(tot), function(i) {
-          type_arg <- ifelse(packageVersion("ggeffects") >= "2.0.0"), "random", "re")
-           
+           type_arg <- if (packageVersion("ggeffects") >= "2.0.0") "random" else "re"
+
           p <- ggpredict(model = best,
                            terms = tot[i, ..re],
                            condition = c(logDAS = tot$logDAS[i]),
@@ -108,6 +122,11 @@ calc_total <- function(bpue, cols = c("ecoregion", "metierl4", "species"), obs, 
         
     }
     
+    # temp fix, part 2 (convert back)
+    if ("country" %in% re) {
+        obs[country == "de_temp_fix", country := "de"]
+        tot[country == "de_temp_fix", country := "de"]
+    }
     return(ret)
 }
 
@@ -118,9 +137,9 @@ calc_total <- function(bpue, cols = c("ecoregion", "metierl4", "species"), obs, 
 # # ensure random-effects variables are factors (your original line)
 # tot[, (re) := lapply(.SD, as.factor), .SDcols = re]
 
-# # precompute whether "year" is in re, and prepare the usable set of terms
-# has_year <- "year" %in% re
-# re_use   <- if (has_year) setdiff(re, "year") else re
+# # # precompute whether "year" is in re, and prepare the usable set of terms
+ # has_year <- "year" %in% re
+ # re_use   <- if (has_year) setdiff(re, "year") else re
 
 # # choose the year value to inject into `condition`
 # year_value <- NULL

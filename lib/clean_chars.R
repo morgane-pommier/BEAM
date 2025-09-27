@@ -1,5 +1,5 @@
 
-#' Cleans up excessive whitespaces and converts to lowercase
+#' Cleans up excessive whitespaces and converts everything to lowercase
 #' 
 #' @description
 #' `clean_chars` does three things to `x`:

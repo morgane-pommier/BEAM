@@ -19,40 +19,16 @@
 #' @returns A data.table with one row for each row in `needle` and all columns given in `cols`, plus additional columns showing the final model formula, BPUE estimates, lower and upper confidence intervals, and a logical indicating model heterogeneity in the base model (I^2). See details.
 #' @seealso [calc_total()]
 #' @export
-#' 
-BEAM_progress <- function(n) {
-    BEAM_pb$tick(tokens = list(step = n))
-}
+calc_bpue_area2 <- function(needle, cols = colnames(needle), min_re_obs = 2, dat) {
 
-calc_bpue <- function(needle, cols = colnames(needle), min_re_obs = 2, dat) {
-
-    t_start <- Sys.time()
-    
     # parallelization support
     if (nrow(needle) > 1) {
-        
-        if (!is.null(BEAM_pb)) {
-            BEAM_pb$terminate()
-            BEAM_pb <<- NULL
-        }
-        
-        BEAM_pb <<- progress_bar$new(
-            format = "calc_bpue :percent :current/:total [:bar] :elapsed | eta: :eta",
-            total = nrow(needle),
-            width = 60)
-        
-        opts <- list(progress = BEAM_progress)
-        
         ret <- foreach(i = 1:nrow(needle),
                        .export = "calc_bpue", # <- not 100% sure this line is needed.
                        .final = rbindlist,
-                       .packages = c("data.table", "glmmTMB", "metafor", "emmeans"),
-                       .options.snow = opts) %dopar% {
+                       .packages = c("data.table", "glmmTMB", "metafor", "emmeans")) %dopar% {
             calc_bpue(needle = needle[i], cols = cols, min_re_obs = min_re_obs, dat = dat)
-                       }
-        
-        BEAM_pb$terminate()
-        BEAM_pb <<- NULL
+        }
         return(ret)
     }
 
@@ -92,13 +68,11 @@ calc_bpue <- function(needle, cols = colnames(needle), min_re_obs = 2, dat) {
     # vector below, added to the model as random effects.
     if (nrow(dat) >= 5) {
 
-        re <- c("country", "areacode", "year", "metierl5", "vessellength_group",
+        re <- c("country", "year", "metierl5", "vessellength_group",
                 "samplingprotocol", "monitoringmethod")
 
         # but only consider r.e. terms where the number of unique values 
-        # (i.e. levels) is greater than min_re_obs. Note that this effectively
-        # prevents any variables specified in the cols parameter from being included
-        # as random effects in any models, since they will always have length=1.
+        # (i.e. levels) is greater than min_re_obs
         re <- re[sapply(re, function(x) length(unique(dat[[x]]))) >= min_re_obs]
         re.i <- do.call(CJ, replicate(length(re), c(TRUE, FALSE), simplify = FALSE))
         
@@ -130,10 +104,6 @@ calc_bpue <- function(needle, cols = colnames(needle), min_re_obs = 2, dat) {
     }
 
     ret[, model := paste(format(formula(best)), collapse = "")]
-    
-    t_end <- Sys.time()
-    t_elapsed <- difftime(t_end,t_start,units="mins")
-    cat(sprintf("calc_bpue on %d rows completed in %.01f mins\n", nrow(needle), t_elapsed))
     return(ret)
     
 }

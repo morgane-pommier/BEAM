@@ -11,14 +11,14 @@ bodianus scrofa,barred hogfish,Fish
 brama brama,Atlantic pomfret,Fish
 caretta caretta,Loggerhead,Turtles
 centroscyllium fabricii,black dogfish,Fish
-centroscymnus crepidater,longnose velvet dogfish,
+centroscymnus crepidater,longnose velvet dogfish,Fish
 chelidonichthys lucerna,tub gurnard,Fish
 chimaera monstrosa,rabbitfish,Fish
 chlamydoselachus anguineus,frill shark,Fish
 conger conger,conger eel,Fish
 cyclopterus lumpus,lumpfish,Fish
 dasyatis pastinaca,blue stingray,Fish
-deania calcea,birdbeak dogfish,
+deania calcea,birdbeak dogfish,Fish
 delphinus delphis,Short-beaked Common Dolphin,Mammals
 dermochelys coriacea,leatherback turtle,Turtles
 dipturus intermedius,flapper skate,Fish
@@ -35,7 +35,7 @@ helicolenus dactylopterus,blackbelly rosefish,Fish
 hexanchus griseus,bluntnose sixgill shark,Fish
 hippocampus guttulatus,long-snouted seahorse,Fish
 hippoglossus hippoglossus,Atlantic halibut,Fish
-isurus paucus,longfin mako,
+isurus paucus,longfin mako,Fish
 labrus bergylta,ballan wrasse,Fish
 lampetra fluviatilis,European river lamprey,Fish
 larus argentatus,Herring Gull,Seabirds
@@ -53,7 +53,7 @@ mora moro,googly-eyed cod,Fish
 morus bassanus,Northern Gannet,Seabirds
 mycteroperca fusca,island grouper,Fish
 myliobatis aquila,spotted eagle ray,Fish
-pagellus bogaraveo,blackspot seabream,
+pagellus bogaraveo,blackspot seabream,Fish
 petromyzon marinus,sea lamprey,Fish
 phoca vitulina,Harbor Seal,Mammals
 phocoena phocoena,Harbor Porpoise,Mammals
@@ -149,3 +149,11 @@ dentex dentex,Common dentex,Fish
 galeus murinus,Mouse catshark,Fish
 hydrolagus mirabilis,hydrolagus mirabilis,Fish
 leucoraja melitensis,Maltese skate,Fish
+bucephala clangula,Common goldeneye,Seabirds
+hexanchus nakamurai,Bigeyed sixgill shark,Fish
+mergus merganser,Common merganser,Seabirds
+puffinus puffinus,Manx shearwater,Seabirds
+stenella frontalis,Atlantic spotted dolphin,Mammals
+glaucostegus cemiculus,Blackchin guitarfish,Fish
+salmo salar,Atlantic salmon,Fish
+anguilla anguilla,European eel,FIsh
