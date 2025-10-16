@@ -2,7 +2,7 @@ Hello world!
 here [ICES WGBYC ToRC](https://www.ices.dk/community/groups/Pages/WGbyc.aspx) and [CIBBRiNA WP6](https://cibbrina.eu)
 build the code for BEAM
 
-This version (version 2 - 16 Oct 2025) is the versio nwhich will be reviewed at WKBBEAM
+This version (version 2 - 16 Oct 2025) is the version which will be reviewed at ICES WKBBEAM (1-5 Dec 2025).
 
 The original idea of BEAM was developed by Marjorie Lyssikatos and David Lusseau.
 
