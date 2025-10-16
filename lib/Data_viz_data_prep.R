@@ -6,7 +6,7 @@ library(data.table)
 library(countrycode)
 library(dplyr)
 
-#Set working directory to BEAM-main to be able to call some of it's functions directly. Version of the code as of 07/07/2025. Any modification to fit the purpose of this script are detailed below.
+#Set working directory to BEAM-main to be able to call some of it's functions directly. Version of the code as of 16/10/2025. 
 
 #Input datasets 
 #Present in the BEAM /data folder
@@ -15,73 +15,15 @@ annex01_species <- fread("data/ICES_Annex_1_WGBYC_2024.csv",
 mediterranean <- fread("data/Med_Annex_1_WGBYC_2025.csv",
                         col.names = c("aphiaid", "species", "ecoregion", "taxon"), encoding = "Latin-1")
 
-monitoring <- fread("data/obs3.csv")
+monitoring <- fread("data/obs1.csv")
 fishing <- fread("data/fishing_all_years.csv")
-bycatch <- fread("data/bycatch2.csv")
-#monitoring <- fread(file.path("C:/Users/David/OneDrive - Danmarks Tekniske Universitet/WGBYC/wgbyc 2025/data/Bycatch_monitoring_effort_2024&2025Extraction_10092025.csv"))
-#fishing <- fread(file.path("C:/Users/David/OneDrive - Danmarks Tekniske Universitet/WGBYC/wgbyc 2025/data/FishingEffort_2024&2025Extraction_10092025.csv"))
-#bycatch <- fread(file.path("C:/Users/David/OneDrive - Danmarks Tekniske Universitet/WGBYC/wgbyc 2025/data/BycatchEvent_2024&2025Extraction_10092025.csv"))
+bycatch <- fread("data/bycatch1.csv")
 
-# D2 <- fread(file.path("C:/Users/David/OneDrive - Danmarks Tekniske Universitet/WGBYC/wgbyc 2025/BEAM-main/data/D2_monitoringeffort_2017_2023.csv"))
-# D2 <- D2[,-"V1"]
-# D1 <- fread(file.path("C:/Users/David/OneDrive - Danmarks Tekniske Universitet/WGBYC/wgbyc 2025/BEAM-main/data/D1_fishingeffort_2017_2023.csv"))
-# D1 <- D1[,-"V1"]
-# D3 <- fread(file.path("C:/Users/David/OneDrive - Danmarks Tekniske Universitet/WGBYC/wgbyc 2025/BEAM-main/data/D3_bycatchevent_2017_2023.csv"))
-# D3 <- D3[,-"V1"]
-# # 
-# # #Merging with data from previous years
-# 
-# #fishing had an extra column so I am removing it, I don't think it's necessary for beam
-# fishing <- fishing[,-"TripsF_txt"]
-# 
-# #Columns are matching in the correct order but the case of the column names is different
-# colnames(D1) <- colnames(fishing)
-# fishing <- rbind(fishing,D1)
-# 
-# #Columns are matching in the correct order but the case of the column names is different
-# colnames(D2) <- colnames(monitoring)
-# monitoring <- rbind(monitoring, D2)
-# 
-# #bycatch had an extra "ID" column so I am removing it, I don't think it's necessary for beam
-# bycatch <- bycatch[,-"ID"]
-# #Columns are matching in the correct order but the case of the column names is different
-# colnames(D3) <- colnames(bycatch)
-# bycatch <- rbind(bycatch, D3)
 
-#Correcting country codes to ISO 3 letters
-# 
-# all_objects <- list(monitoring, bycatch, fishing)
-# 
-# all_objects <- lapply(all_objects, function(df) {
-#   df[Country == "SI", Country := "IS"] #Clean typo for Iceland
-#   df[, country_ISO3 := countrycode(Country, origin = "iso2c", destination = "iso3c")] #Converts country code from ISO two letters to ISO three letters
-#   print(table(df[, .(Country, is.na(country_ISO3))])) #Printing a check along the way to manually see where NAs are introduced if any. But they should be fixed automatically in the following line, this is just to visually assess what caused them in case it's an unusual reason.
-#   df[is.na(country_ISO3), country_ISO3 := Country]#For instances where this introduced NAs (e.g. PT-20), replace by the original code
-#   df[, Country := country_ISO3] #replace in the original column used in the code afterwards
-#   df[, country_ISO3 := NULL] #removing the temporary column
-#   df
-# })
-# 
-# monitoring <- all_objects[[1]]
-# bycatch <- all_objects[[2]]
-# fishing <- all_objects[[3]]
-# 
-# if (c("NULL")%in%unique(bycatch$IncidentsWithPingers)) {
-#   bycatch$IncidentsWithPingers[bycatch$IncidentsWithPingers=="NULL"]<-"0"
-#   bycatch$IncidentsWithPingers<-as.numeric(bycatch$IncidentsWithPingers)
-# }
-# 
-# 
-# if (c("NULL")%in%unique(bycatch$IndividualsWithPingers)) {
-#   bycatch$IndividualsWithPingers[bycatch$IndividualsWithPingers=="NULL"]<-"0"
-#   bycatch$IndividualsWithPingers<-as.numeric(bycatch$IndividualsWithPingers)
-# }
-# 
+#### Re-inserting some of the /clean_data.R steps, but not all because we want to keep track of instances where checks were not passed instead of discarding records. 
 
-#### Re-inserting some of the /clean_data.R steps, but not all because I want to keep track of instances where checks were not passed. 
-
-#source("lib/clean_chars.R") #No change
-#source("lib/add_vessel_length_groups.R") #No change
+source("lib/clean_chars.R") #No change
+source("lib/add_vessel_length_groups.R") #No change
 
 #colnames(fishing) <- tolower(colnames(fishing))
 #clean_chars(fishing)
@@ -97,11 +39,11 @@ fishing_2024 <- fishing[year == endyear]
 #fishing$metierl6[fishing$metierl6 == "-"] <- NA
 
 ###
-#colnames(monitoring) <- tolower(colnames(monitoring))
-#clean_chars(monitoring)
-#add_vessel_length_groups(monitoring)
+colnames(monitoring) <- tolower(colnames(monitoring))
+clean_chars(monitoring)
+add_vessel_length_groups(monitoring)
 
-#monitoring <- monitoring[!is.na(ecoregion) & !(ecoregion %in% c("north west atlantic"))]
+monitoring <- monitoring[!is.na(ecoregion) & !(ecoregion %in% c("north west atlantic"))]
 
 #This is where I start making changes, to keep track of monitoring methods that didn't pass the first quality checkpoint. 
 
@@ -114,27 +56,27 @@ fishing_2024 <- fishing[year == endyear]
 
 
 monitoring[, monitoring_suitable := ifelse(
-  (monitoringmethod == "lb" & country != "pt") |
-    (monitoringmethod == "oth" & country != "no") |
+  (monitoringmethod == "lb" & country != "prt") |
+    (monitoringmethod == "oth" & country != "nor") |
     (monitoringmethod == "po") |
-    (monitoringmethod == "vo" & country == "ee"),
+    (monitoringmethod == "vo" & country == "est"),
   "no", "yes")]
 
 ###
 
-#colnames(bycatch) <- tolower(colnames(bycatch))
-#clean_chars(bycatch)
-#add_vessel_length_groups(bycatch)
+colnames(bycatch) <- tolower(colnames(bycatch))
+clean_chars(bycatch)
+add_vessel_length_groups(bycatch)
 
-#bycatch <- bycatch[!is.na(ecoregion) & !(ecoregion %in% c("north west atlantic"))]
+bycatch <- bycatch[!is.na(ecoregion) & !(ecoregion %in% c("north west atlantic"))]
 
-#Same modification as for monitoring effort, adding the flag monitoring_suitable YES/NO
+#Same modification as for monitoring effort, adding the flag monitoring_suitable YES/NO. Also correcting country code to three letter ISO
 
 bycatch[, monitoring_suitable := ifelse(
-  (monitoringmethod == "lb" & country != "pt") |
-    (monitoringmethod == "oth" & country != "no") |
+  (monitoringmethod == "lb" & country != "prt") |
+    (monitoringmethod == "oth" & country != "nor") |
     (monitoringmethod == "po") |
-    (monitoringmethod == "vo" & country == "ee"),
+    (monitoringmethod == "vo" & country == "est"),
   "no", "yes")]
 
 # bycatch <- bycatch[!(monitoringmethod == "lb" & country != "pt")]
@@ -258,57 +200,47 @@ obs[species %in% c("apristurus", "centroselachus crepidater", "deania calceus", 
 obs[, taxon_bycatch_monitor_ok := (taxa_monitored %in% c("all","elasmobranchs~seabirds~mammals", "protectedspecies")) | (taxa_monitored == taxon)
 ]
 
+obs[taxon == "elasmobranchs" & taxa_monitored == "fish",
+    taxon_bycatch_monitor_ok := TRUE] #Taxon monitored is okay if fish was the protocol and they reported elasmobranchs
+
+obs[taxon == "fish" & taxa_monitored == "elasmobranchs~seabirds~mammals",
+    taxon_bycatch_monitor_ok := FALSE] #Taxon monitored is not okay if fish were reported under elasmobranchs~seabirds~mammals
+
 obs[, taxon_bycatch_monitor_ok := ifelse(taxon_bycatch_monitor_ok == TRUE, "yes", "no")]
 
 #Removing Arctic Ocean because there is no info in the metierl4 column
 
 obs <- obs[metierl4!='']
 
-#Create a column with average monitoring effort per year
+
 # Need to sum all the days at sea available per species x ecoregion x metierl4 x monitoring suitable x taxa monitored ok
 
 #First let's clean up a bit and get rid of the columns we don't need anymore.
 
 obs <- obs[,.(ecoregion, metierl4, monitoring_suitable, daysatsea, species, taxon, n_ind, taxon_bycatch_monitor_ok, year)]
 
-#Bringing in the proportion of fishing monitored...
-
-fishing_agg <- fishing[, .(daysatseaf = sum(daysatseaf)), by = .(ecoregion, metierl4, year)]
-
-#Add this to the obs table
-
-obs[fishing_agg, on = .(ecoregion, year,
-                    metierl4), total_fishing := daysatseaf]
-
-#Now, do I compute the % effort, and then average it, or do I aggregate it and then compute the % effort.
-#Let's do it before and take the average
-
-obs[,monitoring_coverage := daysatsea*100 / total_fishing]
-#We have NAs for some cases where total fishing is not available for that year
-
 #Create a new aggregated dataset where days at sea and n_ind are sums of multiple rows
 
-obs_agg <- obs[, .(n_ind = sum(n_ind), daysatsea = sum(daysatsea), n_year = length(unique(year)), average_monitoring_coverage = mean(monitoring_coverage, na.rm=TRUE)), by = .(ecoregion, metierl4, monitoring_suitable, species, taxon_bycatch_monitor_ok)]
-obs_agg[, average_monitoring_effort := as.numeric(daysatsea/n_year)] #Should I take the mean instead and remove NAs ? What if we only have monitoring for 3 years ? Should we still take the average over 7 years, or the average over those three years ? Same question for fishing.
+obs_agg <- obs[, .(n_ind = sum(n_ind), daysatsea = sum(daysatsea), n_year = length(unique(year))), by = .(ecoregion, metierl4, monitoring_suitable, species, taxon_bycatch_monitor_ok, country, monitoringmethod, samplingprotocol)]
 
- 
+#obs_agg[, average_monitoring_effort := as.numeric(daysatsea/n_year)] 
 
 #Adding some of these information again.
 obs_agg[obs, on = "species", taxon := taxon]
  
-#Now let's bring in... THE BPUE !!!
+#Now let's bring in... THE BPUE !
 
 bpue <- fread("data/bpue1.csv") 
+
 #Read the latest version of the bpue estimates.
 
-#Join the bpue estimates, only for the lines for which they were calculated, so when monitoring suitable = yes. Thoughts for later: When we both have suitable and unsuitable monitoring for a given combination, should we consider bpue was achieved ?
-#Should we keep the fail records only for ecoregion / metier / species for which we don't have a bpue ?
+#Join the bpue estimates, only for the lines for which they were calculated, so when monitoring suitable = yes. 
 
 obs_agg[monitoring_suitable == "yes" & taxon_bycatch_monitor_ok == "yes", c("bpue", "lwr", "upr", "replicates", "model", "base_model_heterogeneity") := bpue[.SD, on = .(ecoregion, metierl4, species), .(bpue, lwr, upr, replicates, model, base_model_heterogeneity)]]
  
 
 #Create a new column for BPUE status (estimated / NA)
-obs_agg[, bpue_available := as.numeric(ifelse(is.na(bpue), "0", "1"))] #Using a numeric here in case we watn to use a analysis method based on matrices.
+obs_agg[, bpue_available := as.numeric(ifelse(is.na(bpue), "0", "1"))] #Using a numeric here in case we want to use an analysis method based on matrices.
 
 #Converting heterogeneity test to YES/NO for consistency across variables
 obs_agg[, base_model_heterogeneity := ifelse(base_model_heterogeneity==TRUE, "yes", "no")] 
@@ -340,23 +272,13 @@ obs_agg[, unused_n_ind_sampling := sum(n_ind[monitoring_suitable == "yes" & taxo
 obs_agg[, unused_n_ind_both := sum(n_ind[monitoring_suitable == "no" & taxon_bycatch_monitor_ok == "no"], na.rm = TRUE),
         by = .(ecoregion, metierl4, species)]
 
-# --- Totals ---
 obs_agg[, unused_DaS := unused_DaS_monitoring + unused_DaS_sampling + unused_DaS_both,
         by = .(ecoregion, metierl4, species)]
 
 obs_agg[, unused_n_ind := unused_n_ind_monitoring + unused_n_ind_sampling + unused_n_ind_both,
         by = .(ecoregion, metierl4, species)]
 
-
-
-#Compute percentages
-obs_agg[, pct_usable_effort :=
-          fifelse((usable_DaS + unused_DaS) > 0,
-                  daysatsea * 100 / (usable_DaS + unused_DaS), 0)]
-
-obs_agg[, pct_usable_records :=
-          fifelse((usable_n_ind + unused_n_ind) > 0,
-                  n_ind * 100 / (usable_n_ind + unused_n_ind), 0)]
+#Create a horter version of the table with the "best" data available for each ecoregion x metier x species combination
 
 #Setting priority rules
 obs_agg[, priority := fcase(
@@ -382,9 +304,9 @@ obs_short[, bycatch_reported := as.factor(
   ifelse(n_ind > 0 | unused_n_ind > 0, "yes", "no")
 )]
 
-#Add column for number of terms in the model (NA = no model or "none", 0 = "n_ind ~ 1" , and then count number of random effects (maybe counting the number of "+" sgins ?))
+#Add column for number of terms in the model (NA = no model or "none", 0 = "n_ind ~ 1" , and then count number of random effects)
 
-#For rows that have a bpue, I want to capture additional parameters: 
+#For rows that have a bpue, we want to capture additional parameters: 
 #How many random factors were included in the model, if any
 #Was monitoring or sampling protocol retained as a random effect ?
 #Was there some unexplained heterogeneity left ? I suppose these are the case when heterogeneity = TRUE but no random effect is retained in the model.
@@ -410,13 +332,13 @@ formulas[, re := lapply(model_formula, function(f) {
 
 formulas[, n_re := sapply(re, length)]
 formulas[is.na(re), n_re := 0] # replacing by 0 when model was n_ind ~ 1
-formulas[is.null(model_formula), n_re := NA] #Replaceing by NAs where there was no model
+formulas[is.null(model_formula), n_re := NA] #Replacing by NAs where there was no model
 formulas[, unexplained_heterogeneity := ifelse(base_model_heterogeneity == "yes" & n_re == 0, "yes", "no")]
 
 
 all_strings <- unique(unlist(formulas[!is.na(re), re]))
 
-# Step 2: Create one column per unique string
+# Create one column per unique variable
 for (s in all_strings) {
   formulas[, (s) := ifelse(is.na(re), "no", ifelse(sapply(re, function(x) s %in% x), "yes", "no"))]
 }
@@ -435,7 +357,7 @@ obs_short[model == "only one", bpue_usable := "no"]
 
 obs_short[samplingprotocol == "yes" | monitoringmethod == "yes", bpue_usable := "no"]
 
-#Now need to pull in the fishing effort data to see which BPUE will be unusable due to some levels of random effect not being available.
+#Now we need to pull in the fishing effort data to see which BPUE will be unusable due to some levels of random effect not being available.
 
 total_bycatch <- fread("data/tot1.csv")
 
