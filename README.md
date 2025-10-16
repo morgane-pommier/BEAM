@@ -6,7 +6,7 @@ build the code for BEAM
 
 <table>
   <tr>
-    <td style="width: 50%; vertical-align: top;">
+    <td style="width: 10%; vertical-align: top;">
       <img src="./implementation_examples/BEAM_hexsticker_copilot.png"
            alt="BEAM hexSticker"
            style="maxBEAM</strong> The original idea of BEAM was developed by Marjorie Lyssikatos and David Lusseau.
