@@ -9,7 +9,7 @@ This version (version 2 - 16 Oct 2025) is the versio nwhich will be reviewed at 
 <table>
   <tr>
     <td style="width: 50%; vertical-align: top; padding-right: 16px;">
-      [./implementation_examples/BEAM_hexsticker_copilot.png](https://raw.githubusercontent.com/dlusseau/BEAM/implementation_examples/BEAM_hexsticker_copilot.png)
+      ![BEAM hexSticker](https://github.com/dlusseau/BEAM/blob/b6e9714cab37242ae552efd5da4660fea562fa27/implementation_examples/BEAM_hexsticker_copilot.png)
     </td>
     <td style="vertical-align: top;">
       <p>The original idea of BEAM was developed by Marjorie Lyssikatos and David Lusseau.</p>
