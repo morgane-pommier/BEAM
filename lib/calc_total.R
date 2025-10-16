@@ -88,7 +88,7 @@ calc_total <- function(bpue, cols = c("ecoregion", "metierl4", "species"), obs, 
 		# tot only has THISYEAR-1 data so if year %in% re then we only predict for THISYEAR-1
         
         pred <- lapply(1:nrow(tot), function(i) {
-          type_arg <- ifelse(packageVersion("ggeffects") >= "2.0.0"), "random", "re")
+          type_arg <- ifelse(packageVersion("ggeffects") >= "2.0.0", "random", "re")
            
           p <- ggpredict(model = best,
                            terms = tot[i, ..re],
@@ -110,49 +110,3 @@ calc_total <- function(bpue, cols = c("ecoregion", "metierl4", "species"), obs, 
     
     return(ret)
 }
-
-
-##################################
-#####
-
-# # ensure random-effects variables are factors (your original line)
-# tot[, (re) := lapply(.SD, as.factor), .SDcols = re]
-
-# # precompute whether "year" is in re, and prepare the usable set of terms
-# has_year <- "year" %in% re
-# re_use   <- if (has_year) setdiff(re, "year") else re
-
-# # choose the year value to inject into `condition`
-# year_value <- NULL
-# if (has_year) {
-  # if (is.factor(tot$year)) {
-    # # pass the level as a character for factor variables
-    # yr <- "2024"
-    # if (!("2024" %in% levels(tot$year))) {
-      # warning("`year` is a factor and level '2024' was not in the model data; using the last available level instead.")
-      # yr <- tail(levels(tot$year), 1L)
-    # }
-    # year_value <- yr
-  # } else {
-    # year_value <- 2024
-  # }
-# }
-
-# pred <- lapply(seq_len(nrow(tot)), function(i) {
-
-  # # build terms argument; if nothing left after dropping 'year', pass NULL
-  # terms_arg <- if (length(re_use) > 0) tot[i, ..re_use] else NULL
-
-  # # build condition with logDAS (always) and year (if applicable)
-  # cond <- list(logDAS = tot$logDAS[i])
-  # if (has_year) cond$year <- year_value
-
-  # # ggeffects 2.0+ uses "random"; older versions use "re"
-  # p <- ggpredict(
-    # model     = best,
-    # terms     = terms_arg,
-    # condition = cond,
-    # type      = type_arg,
-    # interval  = "confidence",
-    # verbose   = verbose
-  # )

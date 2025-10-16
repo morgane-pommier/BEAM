@@ -7,7 +7,7 @@ beam_download <- function(years, verbose = TRUE) {
         if (filter == TRUE) {
             dat <- subset(dat, year %in% years)
         }
-        fwrite(dat, file = file, sep = ";")
+        fwrite(dat, file = file, sep = ";",na="NA")
         if (verbose == TRUE) {
             cat(sprintf("Saved %s\n", file))
         }

@@ -33,8 +33,8 @@ calc_bpue <- function(needle, cols = colnames(needle), min_re_obs = 2, dat) {
         
         if (exists("BEAM_pb")) {
             BEAM_pb$terminate()
-            rm("BEAM_bp", envir = .GlobalEnv)
-        }
+            rm("BEAM_pb", envir = .GlobalEnv)
+			 }
         
         BEAM_pb <<- progress_bar$new(
             format = "calc_bpue :percent :current/:total [:bar] :elapsed | eta: :eta",
@@ -52,7 +52,7 @@ calc_bpue <- function(needle, cols = colnames(needle), min_re_obs = 2, dat) {
                        }
         
         BEAM_pb$terminate()
-        rm("BEAM_bp", envir = .GlobalEnv)
+        rm("BEAM_pb", envir = .GlobalEnv)
         return(ret)
     }
 

@@ -37,7 +37,7 @@ obs3 <- obs3[ecoreg_species, on = "ecoregion", allow.cartesian = TRUE]
 das_per_ecoregion <- obs3[, .(daysAtSea2017_2023 = sum(daysatsea, na.rm=T)), ecoregion][order(ecoregion)]
 
 fwrite(x = das_per_ecoregion,
-       file = "results/table0_DaS_ecoregion_2017_2023.csv", sep = ";")
+       file = "results/table0_DaS_ecoregion_2017_2023.csv", sep = ";",na="NA")
 
 
 
@@ -109,7 +109,7 @@ species_info[order == "testudines", taxon := "turtles"] #MP: Replaced class = "R
 
 
 #############################################################
-fwrite(species_info, file="results/species_info.csv")
+fwrite(species_info, file="results/species_info.csv",na="NA")
 
 #MP: those edits fix the NAs, but we still miss the fish category and some species in obs3 are not in the species_info list. So I just skipped the species_info object altogether and used the code below. But maybe it's worth checking, surely there was a reason to the use of the species_info and taxonomic list.
 
@@ -144,6 +144,6 @@ obs3[taxon == "elasmobranchs" & taxa_monitored == "fish",
 obs3[taxon == "fish" & taxa_monitored == "elasmobranchs~seabirds~mammals",
      taxon_bycatch_monitor_ok := FALSE] #Taxon monitored is not okay if fish were reported under elasmobranchs~seabirds~mammals
 
-fwrite(obs3, "data/obs3.csv") # previously monitor_effort_bycatch_ecoregion_area_species.csv
+fwrite(obs3, "data/obs3.csv",na="NA") # previously monitor_effort_bycatch_ecoregion_area_species.csv
 
 ########################################## 15Sept2025 DL

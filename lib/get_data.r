@@ -40,9 +40,9 @@ D4<-content(resp4,"text")
 D4<-fromJSON(D4)
 
 rm(list(resp1,resp2,resp3,resp4))
-fwrite(D1,file="data/D1_fishingeffort.csv")
-fwrite(subset(D2,year>2016),file="data/D2_monitoringeffort.csv")
-fwrite(subset(D3,year>2016),file="data/D3_bycatchevent.csv")
-fwrite(D4,file="data/D4_overviewsubmission.csv")
+fwrite(D1,file="data/D1_fishingeffort.csv",na="NA")
+fwrite(subset(D2,year>2016),file="data/D2_monitoringeffort.csv",na="NA")
+fwrite(subset(D3,year>2016),file="data/D3_bycatchevent.csv",na="NA")
+fwrite(D4,file="data/D4_overviewsubmission.csv",na="NA")
 
 }

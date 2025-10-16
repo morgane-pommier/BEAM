@@ -107,6 +107,6 @@ for(c in 1:nrow(total_bycatch)){
 
 
 # Save results ------------------------------------------------------------
-write.csv(total_bycatch, "results/total_bycatch_2021_2023_QCs.csv")
+write.csv(total_bycatch, "results/total_bycatch_QCs.csv")
 
 

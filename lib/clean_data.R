@@ -77,5 +77,5 @@ bycatch2[incidentswithpingers < 0, incidentswithpingers := NA] #minus values = N
 bycatch2[ , n_individ := rowSums(.SD, na.rm = TRUE),.SDcols=c("individualswithpingers","individualswithoutpingers")] #ignore NAs when summing
 bycatch2[ , n_incident := rowSums(.SD, na.rm = TRUE),.SDcols=c("incidentswithpingers","incidentswithoutpingers")] #ignore NAs when summing
 
-fwrite(bycatch2, "data/bycatch2.csv", sep = ";")
+fwrite(bycatch2, "data/bycatch2.csv", sep = ";",na = "NA")
 
