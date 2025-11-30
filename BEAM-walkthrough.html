@@ -11,9 +11,9 @@
 
 <meta name="author" content="WGBYC ToR C" />
 
-<meta name="date" content="2025-10-15" />
+<meta name="date" content="2025-11-30" />
 
-<title>BEAM walkthrough</title>
+<title>BEAM walkthrough - ADGBYC Nov 2025 redo reliability test for L5/area Bob &amp; Baltic</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -350,9 +350,10 @@ display: none;
 
 
 
-<h1 class="title toc-ignore">BEAM walkthrough</h1>
+<h1 class="title toc-ignore">BEAM walkthrough - ADGBYC Nov 2025 redo
+reliability test for L5/area Bob &amp; Baltic</h1>
 <h4 class="author">WGBYC ToR C</h4>
-<h4 class="date">2025-10-15</h4>
+<h4 class="date">2025-11-30</h4>
 
 </div>
 
@@ -685,22 +686,41 @@ of the species and fisheries instead.</p>
 
 #### we want you to think about it for this step, so we kept it manual
 
-#obs3_area &lt;- subset(obs3,(ecoregion==&quot;aegean-levantine sea&quot;|
-#                             ecoregion==&quot;baltic sea&quot;|
-#                             ecoregion==&quot;bay of biscay and the iberian coast&quot;|
-#                             ecoregion==&quot;celtic seas&quot;) &amp;
-#                       (taxon==&quot;mammals&quot;|taxon==&quot;seabirds&quot;))
+obs3_area &lt;- subset(obs3,(ecoregion==&quot;baltic sea&quot;|
+                             ecoregion==&quot;bay of biscay and the iberian coast&quot;) &amp;
+                       (taxon==&quot;mammals&quot;))
 
-#area_m4_spec &lt;- unique(obs3_area[, .(ecoregion, areacode, metierl4, metierl5, species)])
+area_m4_spec &lt;- unique(obs3_area[, .(ecoregion, areacode, metierl4, metierl5, species)])
 
-#bpue1_area &lt;- calc_bpue(needle = area_m4_spec, 
-#                        cols = c(&quot;ecoregion&quot;, &quot;areacode&quot;, &quot;metierl4&quot;, &quot;species&quot;),
-#                        dat = obs3_area[taxon_bycatch_monitor_ok==TRUE])
-#fwrite(bpue1_area, file = &quot;data/bpue1_area.csv&quot;, sep = &quot;;&quot;,na=&quot;NA&quot;)
+bpue1_area &lt;- calc_bpue(needle = area_m4_spec, 
+                        cols = c(&quot;ecoregion&quot;, &quot;areacode&quot;, &quot;metierl4&quot;, &quot;species&quot;),
+                        dat = obs3_area[taxon_bycatch_monitor_ok==TRUE])
+fwrite(bpue1_area, file = &quot;data/bpue1_area.csv&quot;, sep = &quot;;&quot;,na=&quot;NA&quot;)
 
 ################################################################################
-#bpue2_area &lt;- annotate_bpue(bpue1_area, cols = c(&quot;ecoregion&quot;, &quot;areacode&quot;, &quot;metierl4&quot;, &quot;species&quot;))
-#fwrite(bpue2_area, file = &quot;data/bpue2_area.csv&quot;, sep = &quot;;&quot;,na=&quot;NA&quot;)</code></pre>
+bpue2_area &lt;- annotate_bpue(bpue1_area, cols = c(&quot;ecoregion&quot;, &quot;areacode&quot;, &quot;metierl4&quot;))
+fwrite(bpue2_area, file = &quot;data/bpue2_area.csv&quot;, sep = &quot;;&quot;,na=&quot;NA&quot;)</code></pre>
+<p>metier L5 level analysis</p>
+<pre class="r"><code>################################################################################
+# For cases where ecoregion-level estimation and prediction is considered 
+# inappropriate, we can go to the areacode level.
+
+#### we want you to think about it for this step, so we kept it manual
+
+obs3_l5 &lt;- subset(obs3,(ecoregion==&quot;baltic sea&quot;|
+                             ecoregion==&quot;bay of biscay and the iberian coast&quot;) &amp;
+                       (taxon==&quot;mammals&quot;))
+
+area_m4_spec &lt;- unique(obs3_l5[, .(ecoregion, metierl4, metierl5, species)])
+
+bpue1_l5 &lt;- calc_bpue(needle = area_m4_spec, 
+                        cols = c(&quot;ecoregion&quot;, &quot;metierl4&quot;, &quot;metierl5&quot;,&quot;species&quot;),
+                        dat = obs3_l5[taxon_bycatch_monitor_ok==TRUE])
+fwrite(bpue1_l5, file = &quot;data/bpue1_l5.csv&quot;, sep = &quot;;&quot;,na=&quot;NA&quot;)
+
+################################################################################
+bpue2_l5 &lt;- annotate_bpue(bpue1_l5, cols = c(&quot;ecoregion&quot;, &quot;metierl4&quot;,&quot;metierl5&quot;))
+fwrite(bpue2_l5, file = &quot;data/bpue2_l5.csv&quot;, sep = &quot;;&quot;,na=&quot;NA&quot;)</code></pre>
 </div>
 </div>
 <div id="how-calc_bpue-works" class="section level2">
@@ -799,18 +819,18 @@ fwrite(tot1, file = &quot;data/tot1.csv&quot;, sep = &quot;;&quot;,na=&quot;NA&q
 <p>this can be done at an ICES area scale too</p>
 <pre class="r"><code># example of how to use calc_total to estimate bycatch at the ICES area scale
 
-#tot1_area &lt;- vector(mode = &quot;list&quot;, length = nrow(bpue1))
+tot1_area &lt;- vector(mode = &quot;list&quot;, length = nrow(bpue1_area))
 
-#for (i in 1:nrow(bpue1_area)) {
-#    cat(&quot;\rProcessing row &quot;, i, &quot;/&quot;, nrow(bpue1_area), sep=&quot;&quot;)
-#    tot1[[i]] &lt;- calc_total(bpue1_area[i],
-#                            obs = obs3[taxon_bycatch_monitor_ok==TRUE], 
-#                            all = all2, 
-#                            cols = c(&quot;areacode&quot;, &quot;metierl4&quot;, &quot;species&quot;),
-#                            verbose = FALSE)
-#}
-#tot1_area &lt;- rbindlist(tot1_area)
-#fwrite(tot1_area, file = &quot;data/tot1.csv&quot;, sep = &quot;;&quot;,na=&quot;NA&quot;)</code></pre>
+for (i in 1:nrow(bpue1_area)) {
+    cat(&quot;\rProcessing row &quot;, i, &quot;/&quot;, nrow(bpue1_area), sep=&quot;&quot;)
+    tot1[[i]] &lt;- calc_total(bpue1_area[i],
+                            obs = obs3[taxon_bycatch_monitor_ok==TRUE], 
+                            all = all2, 
+                            cols = c(&quot;ecoregion&quot;, &quot;areacode&quot;, &quot;metierl4&quot;, &quot;species&quot;),
+                            verbose = FALSE)
+}
+tot1_area &lt;- rbindlist(tot1_area)
+fwrite(tot1_area, file = &quot;data/tot1.csv&quot;, sep = &quot;;&quot;,na=&quot;NA&quot;)</code></pre>
 <p>At its core, calc_total refit the best model for BPUE, then assess
 whether all the levels in all2 for the random effects included in the
 best model have been monitored, and if so predict bycatch for the log
@@ -982,11 +1002,6 @@ runApp(&quot;lib/Sample_retention_BEAM_flow_chart_2025.R&quot;)</code></pre>
 <h2>Reliability measures - added September 2025</h2>
 <div id="section-19" class="section level111">
 <p class="heading"></p>
-<p>note that this code will change before WKBBEAM start date: it is
-currently not optimised and will be replaced shortly by a parallelised
-version. We advise participants not to run this code yet (it takes about
-10 hours) but we provide it so that you can see the general approach
-used (that part will not changed).</p>
 <p>here we try to provide some posthoc insight about the usefulness of
 the mean estimate when a bycatch estimate can be produced. This does not
 speak to the validity of the bycatch estimate, but simply tries to
@@ -1011,8 +1026,7 @@ library(ggeffects)
 library(emmeans)
 library(data.table)
 
-## this is slow at the moment but will be parallelised before WKBBEAM
-source(&quot;lib/reliability_estimation.R&quot;)</code></pre>
+source(&quot;lib/reliability_estimation_p.R&quot;)</code></pre>
 <pre class="r"><code>#code snippet from reliability_estimation.R to see how logRMSE is computed and used
 
 #code in rmse_estimator function
@@ -1055,6 +1069,41 @@ table.print$reliability[which(temp$reliability2==TRUE)]&lt;-&quot;more reliable&
 fwrite(table.print,file=&quot;results/bpue_table_print.csv&quot;,na=&quot;NA&quot;)
 
 fwrite(subset(table.print,reliability==&quot;more reliable&quot;),file=&quot;results/table_reliable_estimates.csv&quot;,na=&quot;NA&quot;)</code></pre>
+<p>Here we can also run it at the ices area and metier level 5 levels
+######################################################## ### cases we
+want to run #######################################################</p>
+<pre class="r"><code>## these are hand curated, you can see that you do not find this data file produced in the code above
+icesarea&lt;-fread(&quot;data/cases_with_total_bycatch_area_mammals.csv&quot;)
+L5&lt;-fread(&quot;data/cases_with_total_bycatch_L5_mammals.csv&quot;)
+icesareacases&lt;-icesarea[!is.na(icesarea$tot_mean)&amp;icesarea$taxa==&quot;mammals&quot;,]
+L5cases&lt;-L5[!is.na(L5$tot_mean)&amp;L5$taxa==&quot;mammals&quot;,]</code></pre>
+<pre class="r"><code>source(&quot;lib/reliability_estimation_p_ready.r&quot;)
+
+realibility_general(obs3=obs3_area,bpues=bpue1_area,cols = c(&quot;ecoregion&quot;, &quot;areacode&quot;,&quot;metierl4&quot;, &quot;species&quot;),fileoutput=&quot;results/bpue_table_print_reliability_subset_area.csv&quot;)
+
+realiabilitydf&lt;-fread(&quot;results/bpue_table_print_reliability_subset_area.csv&quot;)
+
+icesareacases[realiabilitydf, on = c(&quot;ecoregion&quot;,&quot;areacode&quot;,&quot;metierl4&quot;,&quot;species&quot;), reliability := i.reliability]
+icesareacases$delta&lt;-log10(icesareacases$tot_upr+1)-log10(icesareacases$tot_lwr+1)
+
+icesareacases$reliability2&lt;-FALSE
+icesareacases$reliability2[icesareacases$reliability==TRUE&amp;icesareacases$delta&lt;2]&lt;-TRUE
+
+fwrite(icesareacases,file=&quot;results/icesareacases.csv&quot;)
+
+#########
+
+realibility_general(obs3=obs3_l5,bpues=bpue1_l5,cols = c(&quot;ecoregion&quot;,&quot;metierl4&quot;,&quot;metierl5&quot;, &quot;species&quot;),fileoutput=&quot;results/bpue_table_print_reliability_subset_l5.csv&quot;)
+
+realiabilitydf&lt;-fread(&quot;results/bpue_table_print_reliability_subset_l5.csv&quot;)
+
+L5cases[realiabilitydf, on = c(&quot;ecoregion&quot;,&quot;metierl4&quot;,&quot;metierl5&quot;,&quot;species&quot;), reliability := i.reliability]
+L5cases$delta&lt;-log10(L5cases$tot_upr+1)-log10(L5cases$tot_lwr+1)
+
+L5cases$reliability2&lt;-FALSE
+L5cases$reliability2[L5cases$reliability==TRUE&amp;L5cases$delta&lt;2]&lt;-TRUE
+
+fwrite(L5cases,file=&quot;results/L5cases.csv&quot;)</code></pre>
 </div>
 <div id="section-20" class="section level111">
 <p class="heading"></p>
