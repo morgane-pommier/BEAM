@@ -11,5 +11,6 @@ WGBYC ToR C members contributed significantly to non-coding development and beta
 
 The efforts to get BEAM to TAF are led by André Moan.
 
+BEAM is being benchmarked by ICES 1.5 December, come back for updates after that week. We advise now to use the Rmd script to run through the BEAM functions (rather than BEAM v2, which will be updated to BEAM v3 after the benchmark).
 
 ![BEAM hexSticker](https://github.com/dlusseau/BEAM/blob/b6e9714cab37242ae552efd5da4660fea562fa27/implementation_examples/BEAM_hexsticker_copilot.png)
