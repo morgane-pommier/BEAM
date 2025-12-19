@@ -11,9 +11,9 @@
 
 <meta name="author" content="WGBYC ToR C" />
 
-<meta name="date" content="2025-11-30" />
+<meta name="date" content="2025-12-05" />
 
-<title>BEAM walkthrough - ADGBYC Nov 2025 redo reliability test for L5/area Bob &amp; Baltic</title>
+<title>BEAM walkthrough - WKBBEAM 1 Dec 2025</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -350,10 +350,9 @@ display: none;
 
 
 
-<h1 class="title toc-ignore">BEAM walkthrough - ADGBYC Nov 2025 redo
-reliability test for L5/area Bob &amp; Baltic</h1>
+<h1 class="title toc-ignore">BEAM walkthrough - WKBBEAM 1 Dec 2025</h1>
 <h4 class="author">WGBYC ToR C</h4>
-<h4 class="date">2025-11-30</h4>
+<h4 class="date">2025-12-05</h4>
 
 </div>
 
@@ -665,7 +664,10 @@ considered.</p>
 <p>we first define the ecoregion x metier level 4 x species cases for
 which we want to estimate bpue and then call the calc_bpue function to
 produce bpue1:</p>
-<pre class="r"><code>eco_m4_spec &lt;- unique(obs3[, .(ecoregion, metierl4, species)])
+<pre class="r"><code>#this is a trial as part o fthe benchmark
+#obs3&lt;-obs3[obs3$ecoregion==&quot;bay of biscay and the iberian coast&quot;&amp;obs3$metierl4==&quot;ptm&quot;&amp;obs3$taxon==&quot;mammals&quot;]
+
+eco_m4_spec &lt;- unique(obs3[, .(ecoregion, metierl4, species)])
 
 bpue1 &lt;- calc_bpue(eco_m4_spec,
                    cols = c(&quot;ecoregion&quot;, &quot;metierl4&quot;, &quot;species&quot;),
@@ -690,7 +692,12 @@ obs3_area &lt;- subset(obs3,(ecoregion==&quot;baltic sea&quot;|
                              ecoregion==&quot;bay of biscay and the iberian coast&quot;) &amp;
                        (taxon==&quot;mammals&quot;))
 
-area_m4_spec &lt;- unique(obs3_area[, .(ecoregion, areacode, metierl4, metierl5, species)])
+obs3_area &lt;- subset(obs3,(ecoregion==&quot;bay of biscay and the iberian coast&quot;) &amp;
+                        (metierl4==&quot;ptm&quot;)&amp;
+                       (taxon==&quot;mammals&quot;))
+
+
+area_m4_spec &lt;- unique(obs3_area[, .(ecoregion, areacode, metierl4, species)])
 
 bpue1_area &lt;- calc_bpue(needle = area_m4_spec, 
                         cols = c(&quot;ecoregion&quot;, &quot;areacode&quot;, &quot;metierl4&quot;, &quot;species&quot;),
@@ -816,6 +823,22 @@ for (i in 1:nrow(bpue1)) {
 }
 tot1 &lt;- rbindlist(tot1)
 fwrite(tot1, file = &quot;data/tot1.csv&quot;, sep = &quot;;&quot;,na=&quot;NA&quot;)</code></pre>
+<pre class="r"><code>#######
+##### sandbox
+
+data&lt;-obs3[obs3$species == &quot;alosa fallax&quot;,]
+
+data$fishdays&lt;-rpois(nrow(data),1000)
+glm0
+
+p &lt;- ggpredict(model = glm0,terms=data.frame(country=&quot;swe&quot;&amp;year=&quot;2023&quot;),
+                           condition = c(logDAS = log(data$fishdays),
+                           type = &quot;random&quot;,
+                           interval = &quot;confidence&quot;,
+                           verbose = verbose)
+
+###########
+##########</code></pre>
 <p>this can be done at an ICES area scale too</p>
 <pre class="r"><code># example of how to use calc_total to estimate bycatch at the ICES area scale
 
@@ -823,14 +846,17 @@ tot1_area &lt;- vector(mode = &quot;list&quot;, length = nrow(bpue1_area))
 
 for (i in 1:nrow(bpue1_area)) {
     cat(&quot;\rProcessing row &quot;, i, &quot;/&quot;, nrow(bpue1_area), sep=&quot;&quot;)
-    tot1[[i]] &lt;- calc_total(bpue1_area[i],
-                            obs = obs3[taxon_bycatch_monitor_ok==TRUE], 
+    tot1_area[[i]] &lt;- calc_total(bpue1_area[i],
+                            obs = obs3_area[taxon_bycatch_monitor_ok==TRUE], 
                             all = all2, 
-                            cols = c(&quot;ecoregion&quot;, &quot;areacode&quot;, &quot;metierl4&quot;, &quot;species&quot;),
-                            verbose = FALSE)
+                            cols = c(&quot;ecoregion&quot;,&quot;areacode&quot;, &quot;metierl4&quot;, &quot;species&quot;),
+                            verbose = TRUE)
 }
 tot1_area &lt;- rbindlist(tot1_area)
-fwrite(tot1_area, file = &quot;data/tot1.csv&quot;, sep = &quot;;&quot;,na=&quot;NA&quot;)</code></pre>
+fwrite(tot1_area, file = &quot;data/tot1.csv&quot;, sep = &quot;;&quot;,na=&quot;NA&quot;)
+
+tot1_area_dd&lt;-tot1_area[species==&quot;delphinus delphis&quot;]
+fwrite(tot1_area_dd, file = &quot;data/tot1_area_bob_dd.csv&quot;, sep = &quot;;&quot;,na=&quot;NA&quot;)</code></pre>
 <p>At its core, calc_total refit the best model for BPUE, then assess
 whether all the levels in all2 for the random effects included in the
 best model have been monitored, and if so predict bycatch for the log
