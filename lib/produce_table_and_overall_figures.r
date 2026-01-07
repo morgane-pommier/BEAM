@@ -92,6 +92,9 @@ complete_tb2print<-merge(complete_tb2print,bpue1,c("ecoregion","metierl4","speci
 complete_tb2print<-merge(complete_tb2print,summaryyear,c("ecoregion","metierl4","species"),all.x=TRUE)
 complete_tb2print<-merge(complete_tb2print,summaryall,c("ecoregion","metierl4","species"),all.x=TRUE)
 
+complete_tb2print[common_names,on = c("species"), taxa := i.taxon]
+complete_tb2print[common_names,on = c("species"), common := i.common]
+
 CTB_sum = complete_tb2print[
   ,
   .(n_ind = sum(n_ind),
@@ -264,4 +267,5 @@ dev.off()
 png("results/totalbycatch_fish.png",width=20,height=35,units="cm",res=200)
 fish
 dev.off()
+
 
