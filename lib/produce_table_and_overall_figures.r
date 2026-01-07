@@ -28,8 +28,8 @@ table.print$key.representability[grep("metierl5",table.print$model)]<-"there is 
 table.print$key.representability[grep("vessellength_group",table.print$model)]<-"there is between-vessel length category variability in BPUE"
 table.print$key.representability[grep("areacode",table.print$model)]<-"there is spatial variability in BPUE"
 table.print$key.representability[grep("country",table.print$model)]<-"there is spatial variability in BPUE"
-table.print$key.representability[grep("monitoringmethod",table.print$model)]<-"there is variability in BPUE depending on monitoring protocols"
-table.print$key.representability[grep("samplingprotocol",table.print$model)]<-"there is variability in BPUE depending on monitoring protocols"
+table.print$key.representability[grep("monitoringmethod",table.print$model)]<-"there is variability in BPUE depending on monitoring methods"
+table.print$key.representability[grep("samplingprotocol",table.print$model)]<-"there is variability in BPUE depending on sampling protocols"
 
 table.print$n_ind<-round(table.print$n_ind,0)
 table.print$daysatsea<-round(table.print$daysatsea,0)
@@ -267,5 +267,6 @@ dev.off()
 png("results/totalbycatch_fish.png",width=20,height=35,units="cm",res=200)
 fish
 dev.off()
+
 
 
