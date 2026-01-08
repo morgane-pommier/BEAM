@@ -1,8 +1,7 @@
 ---
-title: "BEAM walkthrough - ADGBYC Nov 2025 redo reliability test for L5/area Bob &
-  Baltic"
+title: "BEAM walkthrough - WKBBEAM 1 Dec 2025"
 author: "WGBYC ToR C"
-date: "2025-11-30"
+date: "2025-12-05"
 output:
   html_document: default
   word_document: default
@@ -235,6 +234,9 @@ cases where taxon_bycatch_monitor_ok is FALSE will not be considered.
 we first define the ecoregion x metier level 4 x species cases for which we want to estimate bpue and then call the calc_bpue function to produce bpue1:  
 
 ```{r bpue estimate,  eval=FALSE}
+#this is a trial as part o fthe benchmark
+#obs3<-obs3[obs3$ecoregion=="bay of biscay and the iberian coast"&obs3$metierl4=="ptm"&obs3$taxon=="mammals"]
+
 eco_m4_spec <- unique(obs3[, .(ecoregion, metierl4, species)])
 
 bpue1 <- calc_bpue(eco_m4_spec,
@@ -257,7 +259,12 @@ obs3_area <- subset(obs3,(ecoregion=="baltic sea"|
                              ecoregion=="bay of biscay and the iberian coast") &
                        (taxon=="mammals"))
 
-area_m4_spec <- unique(obs3_area[, .(ecoregion, areacode, metierl4, metierl5, species)])
+obs3_area <- subset(obs3,(ecoregion=="bay of biscay and the iberian coast") &
+                        (metierl4=="ptm")&
+                       (taxon=="mammals"))
+
+
+area_m4_spec <- unique(obs3_area[, .(ecoregion, areacode, metierl4, species)])
 
 bpue1_area <- calc_bpue(needle = area_m4_spec, 
                         cols = c("ecoregion", "areacode", "metierl4", "species"),
@@ -394,6 +401,24 @@ fwrite(tot1, file = "data/tot1.csv", sep = ";",na="NA")
 ```
 
 
+```{r sandbox, eval=FALSE}
+#######
+##### sandbox
+
+data<-obs3[obs3$species == "alosa fallax",]
+
+data$fishdays<-rpois(nrow(data),1000)
+glm0
+
+p <- ggpredict(model = glm0,terms=data.frame(country="swe"&year="2023"),
+                           condition = c(logDAS = log(data$fishdays),
+                           type = "random",
+                           interval = "confidence",
+                           verbose = verbose)
+
+###########
+##########
+```
 this can be done at an ICES area scale too
 
 ```{r total bycatch area, eval=FALSE}
@@ -404,14 +429,18 @@ tot1_area <- vector(mode = "list", length = nrow(bpue1_area))
 
 for (i in 1:nrow(bpue1_area)) {
     cat("\rProcessing row ", i, "/", nrow(bpue1_area), sep="")
-    tot1[[i]] <- calc_total(bpue1_area[i],
-                            obs = obs3[taxon_bycatch_monitor_ok==TRUE], 
+    tot1_area[[i]] <- calc_total(bpue1_area[i],
+                            obs = obs3_area[taxon_bycatch_monitor_ok==TRUE], 
                             all = all2, 
-                            cols = c("ecoregion", "areacode", "metierl4", "species"),
-                            verbose = FALSE)
+                            cols = c("ecoregion","areacode", "metierl4", "species"),
+                            verbose = TRUE)
 }
 tot1_area <- rbindlist(tot1_area)
 fwrite(tot1_area, file = "data/tot1.csv", sep = ";",na="NA")
+
+tot1_area_dd<-tot1_area[species=="delphinus delphis"]
+fwrite(tot1_area_dd, file = "data/tot1_area_bob_dd.csv", sep = ";",na="NA")
+
 ```
 
 
