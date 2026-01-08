@@ -127,8 +127,8 @@ There you will generate a token which you need to copy and paste in the object b
 do note the username: it should be the email (eg louis.attack@dartmouth.edu) you used to make the access request  
 
 ```{r load credentials,  eval=FALSE}
-ices_username <- ""
-token<-""
+ices_username <- "torbjorn.saterberg@slu.se"
+token<-"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoidG9yYmpvcm4uc2F0ZXJiZXJnQHNsdS5zZSIsImp0aSI6IjMzN2E5MDBiLWM1N2MtNGRhMy1iNTI3LTE5ZDU2MmFlNjZjZiIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL2VtYWlsYWRkcmVzcyI6InRvcmJqb3JuLnNhdGVyYmVyZ0BzbHUuc2UiLCJVc2VyRW1haWwiOiJ0b3Jiam9ybi5zYXRlcmJlcmdAc2x1LnNlIiwiRW1haWwiOiJ0b3Jiam9ybi5zYXRlcmJlcmdAc2x1LnNlIiwiZXhwIjoxNzY3MTkzNDM2LCJpc3MiOiJodHRwOi8vdGFmLmljZXMuZGsiLCJhdWQiOiJodHRwOi8vdGFmLmljZXMuZGsifQ.s-jw7LwCMfuqPHYWNuJN--eNjUgIkM8PmldPUFU-KBE"
 
 ```
 
@@ -147,7 +147,7 @@ then you need to decide how many cores you will use for the parallelisation work
 
 ```{r create cluster,  eval=FALSE}
 detectCores()
-ncores<-10 #change this to what you want
+ncores<-16 #change this to what you want
 
 cl <- makeCluster(ncores)
 registerDoSNOW(cl)
@@ -164,7 +164,6 @@ this creates three objects in the workspace (all1 which is D1, obs1 which is D2,
 all1 <- beam_get_raw_data("data/all1.csv", years = years, force_download = FALSE)
 obs1 <- beam_get_raw_data("data/obs1.csv", years = years, force_download = FALSE)
 bycatch1 <- beam_get_raw_data("data/bycatch1.csv", years = years, force_download = FALSE)
-
 ```
 
 ###############################################################################################################
