@@ -7,24 +7,29 @@ table2print<-merge(table2print,bpue1,by=c("ecoregion","metierl4","species"),all=
 table2print<-merge(table2print,summaryyear,by=c("ecoregion","metierl4","species"),all.x=TRUE)
 table2print<-merge(table2print,summaryall,by=c("ecoregion","metierl4","species"),all.x=TRUE)
 
+###MP 07/01/26: Added a few steps to recover taxa information that is not in total_bycatch but required in lines below.
+common_names <- fread("data/commonnames2024.csv")
+common_names$common <- tolower(common_names$common)
+common_names$taxon <- tolower(common_names$taxon)
+table2print[common_names,on = c("species"), taxa := i.taxon]
+table2print[common_names,on = c("species"), common := i.common]
+###
 
 #dat$n_ind / dat$daysatsea
 
 table.print<-table2print[,c("ecoregion","metierl4","taxa","species","common","n_ind","daysatsea","fishing_effort","n_ind_all","daysatsea_all","model.x","bpue","lwr","upr","tbfinal.mean","tbfinal.lwr","tbfinal.upr")]
 
-
-
-
 table.print$interannual<-"none apparent"
 table.print$interannual[grep("year",table.print$model)]<-"there is between-year variability in BPUE"
 
+#07/01/2026: Removed capital letters in variable names so grep() works properly
 table.print$key.representability<-"a constant BPUE appears to be representative"
-table.print$key.representability[grep("metierL5",table.print$model)]<-"there is between-metier level 5 variability in BPUE"
-table.print$key.representability[grep("vesselLength_group",table.print$model)]<-"there is between-vessel length category variability in BPUE"
-table.print$key.representability[grep("areaCode",table.print$model)]<-"there is spatial variability in BPUE"
+table.print$key.representability[grep("metierl5",table.print$model)]<-"there is between-metier level 5 variability in BPUE"
+table.print$key.representability[grep("vessellength_group",table.print$model)]<-"there is between-vessel length category variability in BPUE"
+table.print$key.representability[grep("areacode",table.print$model)]<-"there is spatial variability in BPUE"
 table.print$key.representability[grep("country",table.print$model)]<-"there is spatial variability in BPUE"
-table.print$key.representability[grep("monitoringMethod",table.print$model)]<-"there is variability in BPUE depending on monitoring protocols"
-table.print$key.representability[grep("samplingProtocol",table.print$model)]<-"there is variability in BPUE depending on monitoring protocols"
+table.print$key.representability[grep("monitoringmethod",table.print$model)]<-"there is variability in BPUE depending on monitoring methods"
+table.print$key.representability[grep("samplingprotocol",table.print$model)]<-"there is variability in BPUE depending on sampling protocols"
 
 table.print$n_ind<-round(table.print$n_ind,0)
 table.print$daysatsea<-round(table.print$daysatsea,0)
@@ -86,6 +91,9 @@ names(complete_tb2print)[5:7]<-c("tbfinal.mean","tbfinal.lwr","tbfinal.upr")
 complete_tb2print<-merge(complete_tb2print,bpue1,c("ecoregion","metierl4","species"),all.x=TRUE)
 complete_tb2print<-merge(complete_tb2print,summaryyear,c("ecoregion","metierl4","species"),all.x=TRUE)
 complete_tb2print<-merge(complete_tb2print,summaryall,c("ecoregion","metierl4","species"),all.x=TRUE)
+
+complete_tb2print[common_names,on = c("species"), taxa := i.taxon]
+complete_tb2print[common_names,on = c("species"), common := i.common]
 
 CTB_sum = complete_tb2print[
   ,
@@ -259,3 +267,6 @@ dev.off()
 png("results/totalbycatch_fish.png",width=20,height=35,units="cm",res=200)
 fish
 dev.off()
+
+
+

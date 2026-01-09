@@ -685,8 +685,19 @@ bpues_estimates$reliability2[bpues_estimates$delta<2&bpues_estimates$upper_facto
 
 temp<-merge(table.print,bpues_estimates,by.x=c("Ecoregion","metier L4","Species"),by.y=c("Ecoregion","metier.L4","Species"),all.x=TRUE)
 
-table.print$reliability<-"uncertain"
-table.print$reliability[which(temp$reliability2==TRUE)]<-"more reliable"
+#Adding the color flag at this point. Need to go through a TRUE/FALSE version of the reliability column, as below in the metier L5 / ICES area examples.
+
+table.print$reliability<-FALSE
+table.print$reliability[which(temp$reliability2==TRUE)]<-TRUE
+
+table.print <- add_color_flag(table.print, bpue2) #Uses monitoring coverage from bpue2 and reliability info present in table.print
+
+#Convert TRUE/FALSE to qualifiers for printing
+table.print$reliability <- ifelse(
+  table.print$reliability,
+  "more reliable",
+  "uncertain"
+)
 
 fwrite(table.print,file="results/bpue_table_print.csv",na="NA")
 
@@ -725,6 +736,21 @@ icesareacases$delta<-log10(icesareacases$tot_upr+1)-log10(icesareacases$tot_lwr+
 icesareacases$reliability2<-FALSE
 icesareacases$reliability2[icesareacases$reliability==TRUE&icesareacases$delta<2]<-TRUE
 
+#Adding the color flag at this point.
+
+#The column output from reliability2 needs to be called reliability as in the example above at the ecoregion x metierl4 scale.
+
+icesareacases$reliability <- icesareacases$reliability2 
+
+icesareacases <- add_color_flag(icesareacases, bpue2_area) #Uses monitoring coverage from bpue2_area and reliability info present in icesareacases
+
+#Convert TRUE/FALSE to qualifiers
+icesareacases$reliability <- ifelse(
+  icesareacases$reliability,
+  "more reliable",
+  "uncertain"
+)
+
 fwrite(icesareacases,file="results/icesareacases.csv")
 
 #########
@@ -738,6 +764,22 @@ L5cases$delta<-log10(L5cases$tot_upr+1)-log10(L5cases$tot_lwr+1)
 
 L5cases$reliability2<-FALSE
 L5cases$reliability2[L5cases$reliability==TRUE&L5cases$delta<2]<-TRUE
+
+#Adding the color flag at this point.
+
+#The column output from reliability2 needs to be called reliability as in the example above at the ecoregion x metierl4 scale.
+
+L5cases$reliability <- L5cases$reliability2 
+
+L5cases <- add_color_flag(L5cases, bpue2_L5) #Uses monitoring coverage from bpue2_L5 and reliability info present in L5cases
+
+#Convert TRUE/FALSE to qualifiers
+L5cases$reliability <- ifelse(
+  L5cases$reliability,
+  "more reliable",
+  "uncertain"
+)
+
 
 fwrite(L5cases,file="results/L5cases.csv")
 
@@ -794,4 +836,5 @@ knitr::include_graphics("results/totalbycatch_elasmobranchs_reliability_check_or
 ```{r, echo=FALSE, out.width="90%"}
 knitr::include_graphics("results/totalbycatch_fish_reliability_check_ordered.png")
 ```
+
 
