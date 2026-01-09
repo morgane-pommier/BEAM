@@ -5,15 +5,17 @@
 
 
 
-
-
+# aggregation step
+# AM 2026-01-05: added quarter, defined as jan-mar=>1, apr-jun=>2, jul-sep=>3, oct-dec=>4
+obs2[, quarter := as.integer(factor(month, levels = 1:12, labels = rep(1:4, each = 3)))]
 obs3 = obs2[!is.na(ecoregion) & !is.na(country), .(daysatsea = sum(daysatseaob, na.rm = TRUE)),
-                   by = .(ecoregion, areacode, country, year,
+                   by = .(ecoregion, areacode, country, year, quarter,
                           metierl4, metierl5, vessellength_group,
                           samplingprotocol, monitoringmethod)]
 
+bycatch2[, quarter := as.integer(factor(month, levels = 1:12, labels = rep(1:4, each = 3)))]
 bycatch3 = bycatch2[, .(n_ind = sum(n_individ, na.rm = TRUE)),
-                       by = .(ecoregion, areacode, country, year,
+                       by = .(ecoregion, areacode, country, year, quarter,
                               metierl4, metierl5, vessellength_group,
                               samplingprotocol, monitoringmethod, species)]
 ###

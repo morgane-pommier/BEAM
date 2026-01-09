@@ -92,8 +92,8 @@ calc_bpue <- function(needle, cols = colnames(needle), min_re_obs = 2, dat) {
     # vector below, added to the model as random effects.
     if (nrow(dat) >= 5) {
 
-        re <- c("country", "areacode", "year", "metierl5", "vessellength_group",
-                "samplingprotocol", "monitoringmethod")
+        re <- c("country", "areacode", "year", "quarter", "metierl5", 
+                "vessellength_group", "samplingprotocol", "monitoringmethod")
 
         # but only consider r.e. terms where the number of unique values 
         # (i.e. levels) is greater than min_re_obs. Note that this effectively
