@@ -99,7 +99,7 @@ bycatch[ , n_incident := rowSums(.SD, na.rm = TRUE),.SDcols=c("incidentswithping
 #### Re-inserting some of the steps in the /generate_the_list.R script, but editing according to objectives.
 
 
-monitoring = monitoring[!is.na(ecoregion) & !is.na(country), .(daysatsea = sum(daysatsea, na.rm = TRUE)),
+monitoring = monitoring[!is.na(ecoregion) & !is.na(country), .(daysatsea = sum(daysatseaob, na.rm = TRUE)),
             by = .(ecoregion, areacode, country, year,
                    metierl4, metierl5, vessellength_group,
                    samplingprotocol, monitoringmethod, monitoring_suitable)] #adding monitoring_suitable as a grouping variable to keep the DaS totals separate.
@@ -208,6 +208,8 @@ obs[taxon == "fish" & taxa_monitored == "elasmobranchs~seabirds~mammals",
 
 obs[, taxon_bycatch_monitor_ok := ifelse(taxon_bycatch_monitor_ok == TRUE, "yes", "no")]
 
+obs[taxon == "fish" | taxon == "elamsmobranchs" | taxon == "seabirds" & country == "fra" & monitoringmethod == "em",taxon_bycatch_monitor_ok := FALSE] #France only monitors mammals with EM
+
 #Removing Arctic Ocean because there is no info in the metierl4 column
 
 obs <- obs[metierl4!='']
@@ -221,7 +223,7 @@ obs <- obs[,.(ecoregion, metierl4, monitoring_suitable, daysatsea, species, taxo
 
 #Create a new aggregated dataset where days at sea and n_ind are sums of multiple rows
 
-obs_agg <- obs[, .(n_ind = sum(n_ind), daysatsea = sum(daysatsea), n_year = length(unique(year))), by = .(ecoregion, metierl4, monitoring_suitable, species, taxon_bycatch_monitor_ok, country, monitoringmethod, samplingprotocol)]
+obs_agg <- obs[, .(n_ind = sum(n_ind), daysatsea = sum(daysatsea), n_year = length(unique(year))), by = .(ecoregion, metierl4, monitoring_suitable, species, taxon_bycatch_monitor_ok)]
 
 #obs_agg[, average_monitoring_effort := as.numeric(daysatsea/n_year)] 
 
@@ -380,4 +382,5 @@ obs_short$message <- factor(obs_short$message)
 fwrite(obs_agg,"data/obs_agg_data_vis.csv",na="NA") 
 
 fwrite(obs_short,"data/obs_short_data_vis.csv",na="NA")
+
 
