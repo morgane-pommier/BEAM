@@ -684,7 +684,7 @@ we then merge this information back in the table which is then produced online a
 bpues_estimates$reliability2<-FALSE
 bpues_estimates$reliability2[bpues_estimates$delta<2&bpues_estimates$upper_factor_prop <= 25&bpues_estimates$lower_factor_prop <= 25]<-TRUE
 
-temp<-merge(table.print,bpues_estimates,by.x=c("Ecoregion","metier L4","Species"),by.y=c("Ecoregion","metier.L4","Species"),all.x=TRUE)
+temp<-merge(table.print,bpues_estimates,by.x=c("ecoregion","metierl4","species"),by.y=c("Ecoregion","metier.L4","Species"),all.x=TRUE)
 
 #Adding the color flag at this point. Need to go through a TRUE/FALSE version of the reliability column, as below in the metier L5 / ICES area examples.
 
@@ -837,6 +837,7 @@ knitr::include_graphics("results/totalbycatch_elasmobranchs_reliability_check_or
 ```{r, echo=FALSE, out.width="90%"}
 knitr::include_graphics("results/totalbycatch_fish_reliability_check_ordered.png")
 ```
+
 
 
 
