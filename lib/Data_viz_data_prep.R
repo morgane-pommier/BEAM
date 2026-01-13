@@ -25,6 +25,14 @@ bycatch <- fread("data/bycatch1.csv")
 source("lib/clean_chars.R") #No change
 source("lib/add_vessel_length_groups.R") #No change
 
+
+#Convert country code to ISO 3 letters
+
+monitoring[, country := clean_country_code(country)]
+fishing[, country := clean_country_code(country)]
+bycatch[, country := clean_country_code(country)]
+
+
 #colnames(fishing) <- tolower(colnames(fishing))
 #clean_chars(fishing)
 #add_vessel_length_groups(fishing)
@@ -44,6 +52,7 @@ clean_chars(monitoring)
 add_vessel_length_groups(monitoring)
 
 monitoring <- monitoring[!is.na(ecoregion) & !(ecoregion %in% c("north west atlantic"))]
+
 
 #This is where I start making changes, to keep track of monitoring methods that didn't pass the first quality checkpoint. 
 
@@ -206,9 +215,12 @@ obs[taxon == "elasmobranchs" & taxa_monitored == "fish",
 obs[taxon == "fish" & taxa_monitored == "elasmobranchs~seabirds~mammals",
     taxon_bycatch_monitor_ok := FALSE] #Taxon monitored is not okay if fish were reported under elasmobranchs~seabirds~mammals
 
-obs[, taxon_bycatch_monitor_ok := ifelse(taxon_bycatch_monitor_ok == TRUE, "yes", "no")]
+obs[(taxon %in% c("fish", "elasmobranchs", "seabirds")) &
+      country == "fra" &
+      monitoringmethod == "em",
+    taxon_bycatch_monitor_ok := FALSE]
 
-obs[taxon == "fish" | taxon == "elamsmobranchs" | taxon == "seabirds" & country == "fra" & monitoringmethod == "em",taxon_bycatch_monitor_ok := FALSE] #France only monitors mammals with EM
+obs[, taxon_bycatch_monitor_ok := ifelse(taxon_bycatch_monitor_ok == TRUE, "yes", "no")]
 
 #Removing Arctic Ocean because there is no info in the metierl4 column
 
@@ -382,5 +394,6 @@ obs_short$message <- factor(obs_short$message)
 fwrite(obs_agg,"data/obs_agg_data_vis.csv",na="NA") 
 
 fwrite(obs_short,"data/obs_short_data_vis.csv",na="NA")
+
 
 
