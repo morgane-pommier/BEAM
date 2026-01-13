@@ -108,6 +108,7 @@ library(flextable) #not quite well built
 library(scales)
 library(countrycode)
 library(stringi)
+library(stringr)
 
 ```
 
@@ -836,5 +837,6 @@ knitr::include_graphics("results/totalbycatch_elasmobranchs_reliability_check_or
 ```{r, echo=FALSE, out.width="90%"}
 knitr::include_graphics("results/totalbycatch_fish_reliability_check_ordered.png")
 ```
+
 
 
