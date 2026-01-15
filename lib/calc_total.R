@@ -13,11 +13,13 @@
 #' @param obs data.table with observed (monitored) fishing effort data (e.g. for the last 5 years)
 #' @param all data.table with all (unobserved) fishing effort data, but only for the current year
 #' @param verbose Logical, passed on to predict_response. Set to FALSE if nrow(bpue) > 1.
+#' @param years vector with integers indicating years of assessment. 
+#' @param include.weights boolean indicator indicating whether observations from the five most recent years should have double weight as compared to older data. 
 #' @returns A data.table with all columns given in cols, and additional columns showing the model formula, bpue estimates, lower and upper confidence intervals, and a logical indicating model heterogeneity in the base model (I^2). See details.
 #' @seealso [calc_total()]
 #' @export
 
-calc_total <- function(bpue, cols = c("ecoregion", "metierl4", "species"), obs, allx, verbose = TRUE) {
+calc_total <- function(bpue, cols = c("ecoregion", "metierl4", "species"), obs, allx, verbose = TRUE, years=years, include.weights=FALSE) {
 
     # parallelization support
     if (nrow(bpue) > 1) {
@@ -25,7 +27,7 @@ calc_total <- function(bpue, cols = c("ecoregion", "metierl4", "species"), obs, 
                        .export = "calc_total", # <- not 100% sure this line is needed.
                        .final = rbindlist,
                        .packages = c("data.table", "glmmTMB", "emmeans", "ggeffects")) %dopar% {
-                           calc_total(bpue = bpue[i], cols = cols, obs = obs, allx = allx, verbose = FALSE)
+                           calc_total(bpue = bpue[i], cols = cols, obs = obs, allx = allx, verbose = FALSE, years=years, include.weights=FALSE)
                        }
         return(ret)
     }
@@ -37,6 +39,10 @@ calc_total <- function(bpue, cols = c("ecoregion", "metierl4", "species"), obs, 
     #obs[,(possible_re) := lapply(.SD, as.factor), .SDcols = possible_re]
     obs[,(cols) := lapply(.SD, as.factor), .SDcols = cols]
     obs[, logDAS := log(daysatsea)]
+    
+    # add observation weights to data(if monitoring within the last five years 
+    # use full weight, if older data weight observations half as strongly in the likelihood)
+    obs[, weights := ifelse(year >= (max(years)-4), 1, 0.5)] 
 
     ret <- bpue[, c(cols, "model"), with = FALSE]
     ret[, c("tot_mean", "tot_lwr", "tot_upr", "message", "fishing_effort") :=
@@ -75,8 +81,13 @@ calc_total <- function(bpue, cols = c("ecoregion", "metierl4", "species"), obs, 
         return(ret)
     }
     
-    best <- glmmTMB(formula = form, offset = logDAS, family = nbinom2, data = obs)
-
+    # Refit best model
+    if(isTRUE(include.weights)){
+    best <- glmmTMB(formula = form, offset = logDAS, family = nbinom2, data = obs, weights = weights)
+    } else {
+    best <- glmmTMB(formula = form, offset = logDAS, family = nbinom2, data = obs)  
+    }
+    
     if (re.n == 0) {
       
         tot_obs <- obs

@@ -5,7 +5,6 @@
 #' `calc_bpue` takes monitored fishing effort data obtained in the ICES WGBYC
 #' annual data call, and uses those data to generate a number of models of varying
 #' complexity. It then compares those models using AIC, and returns the best model.
-#' 
 #' @details
 #' If there are multiple rows in `needle`, each row is processed separately, and
 #' rbind'ed into one data.table with nrow equal to the number of rows in `needle`.
@@ -16,6 +15,8 @@
 #' @param cols columns, whose unique combinations, are used to split the data given in `dat`
 #' @param min_re_obs Integer specifying the minimum number of levels needed to include a term as a random effect
 #' @param dat data.table with monitored fishing effort data (e.g. since 2017)
+#' @param years vector with integers indicating years of assessment. 
+#' @param include.weights boolean indicator indicating whether observations from the five most recent years should have double weight as compared to older data. 
 #' @returns A data.table with one row for each row in `needle` and all columns given in `cols`, plus additional columns showing the final model formula, BPUE estimates, lower and upper confidence intervals, and a logical indicating model heterogeneity in the base model (I^2). See details.
 #' @seealso [calc_total()]
 #' @export
@@ -24,7 +25,7 @@ BEAM_progress <- function(n) {
     BEAM_pb$tick(tokens = list(step = n))
 }
 
-calc_bpue <- function(needle, cols = colnames(needle), min_re_obs = 2, dat) {
+calc_bpue <- function(needle, cols = colnames(needle), min_re_obs = 2, dat, years, include.weights = FALSE) {
 
     t_start <- Sys.time()
     
@@ -48,7 +49,7 @@ calc_bpue <- function(needle, cols = colnames(needle), min_re_obs = 2, dat) {
                        .final = rbindlist,
                        .packages = c("data.table", "glmmTMB", "metafor", "emmeans"),
                        .options.snow = opts) %dopar% {
-            calc_bpue(needle = needle[i], cols = cols, min_re_obs = min_re_obs, dat = dat)
+            calc_bpue(needle = needle[i], cols = cols, min_re_obs = min_re_obs, dat = dat, include.weights)
                        }
         
         BEAM_pb$terminate()
@@ -60,6 +61,10 @@ calc_bpue <- function(needle, cols = colnames(needle), min_re_obs = 2, dat) {
     dat <- dat[daysatsea > 0]
     dat[, (cols) := lapply(.SD, as.factor), .SDcols = cols]
     dat[, logDAS := log(daysatsea)]
+    
+    # add observation weights to data(if monitoring within the last five years 
+    # use full weight, if older data weight observations half as strongly in the likelihood)
+    dat[, weights := ifelse(year >= (max(years)-4),1,0.5)] 
     
     ret <- needle[, ..cols]
     ret[, c("model", "bpue", "lwr", "upr", "replicates", "base_model_heterogeneity") :=
@@ -78,8 +83,15 @@ calc_bpue <- function(needle, cols = colnames(needle), min_re_obs = 2, dat) {
         return(ret)
     }
     
-    base_model <- tryCatch(glmmTMB(n_ind ~ 1, offset = logDAS, family = nbinom2, data = dat), error = function(e) e$message)
+    # fit model either including or excluding likelihood weights
+    if (isTRUE(include.weights)){
+      base_model <- tryCatch(glmmTMB(n_ind ~ 1, offset = logDAS, family = nbinom2, data = dat, weights = weights), error = function(e) e$message)
+    } else {
+      base_model <- tryCatch(glmmTMB(n_ind ~ 1, offset = logDAS, family = nbinom2, data = dat), error = function(e) e$message)
+    }
+    
     heterogeneity <- tryCatch((rma.glmm(xi = n_ind, ti = daysatsea, measure = "IRLN", data = dat)$QEp.Wld<0.05), error = function(e) e$message)
+    
     
     if (class(heterogeneity) != "character") {
         ret$base_model_heterogeneity <- heterogeneity
@@ -100,7 +112,7 @@ calc_bpue <- function(needle, cols = colnames(needle), min_re_obs = 2, dat) {
         # prevents any variables specified in the cols parameter from being included
         # as random effects in any models, since they will always have length=1.
         re <- re[sapply(re, function(x) length(unique(dat[[x]]))) >= min_re_obs]
-        re.i <- do.call(CJ, replicate(length(re), c(TRUE, FALSE), simplify = FALSE))
+        re.i <- do.call(CJ, replicate(length(re), c(TRUE, FALSE), simplify = FALSE)) # all possible combinations of random effect levels
         
         # fit all candidate models 
         candidates <- apply(re.i, 1, function(i) {
@@ -113,7 +125,14 @@ calc_bpue <- function(needle, cols = colnames(needle), min_re_obs = 2, dat) {
             form <- sprintf("n_ind ~ 1 + %s", paste(re, collapse = " + "))
             form <- as.formula(form)
             # wrapped this in suppressMessages just to avoid cluttering of the console when running glmmTMB, errors and warnings are still caught by tryCatch.
-            suppressMessages(tryCatch(glmmTMB(formula = form, offset = logDAS, family = nbinom2, data = dat), error = function(e) e$message, warning = function(w) w$message))
+            
+            # fit model either including or excluding model weights
+            if(isTRUE(include.weights)){
+              suppressMessages(tryCatch(glmmTMB(formula = form, offset = logDAS, family = nbinom2, data = dat, weights = weights), error = function(e) e$message, warning = function(w) w$message))  
+            }else{
+              suppressMessages(tryCatch(glmmTMB(formula = form, offset = logDAS, family = nbinom2, data = dat), error = function(e) e$message, warning = function(w) w$message))  
+            }
+  
         })
         
         # pick the best one
