@@ -241,7 +241,8 @@ eco_m4_spec <- unique(obs3[, .(ecoregion, metierl4, species)])
 
 bpue1 <- calc_bpue(eco_m4_spec,
                    cols = c("ecoregion", "metierl4", "species"),
-                   dat = obs3[taxon_bycatch_monitor_ok==TRUE])
+                   dat = obs3[taxon_bycatch_monitor_ok==TRUE],
+                  include.weights = TRUE)
 fwrite(bpue1, file = "data/bpue1.csv", sep = ";",na="NA")
 
 ```
@@ -384,6 +385,11 @@ fwrite(bpue2, file = "data/bpue2.csv", sep = ";",na="NA")
 ###############################################################################################################
 
 we then attempt to predict the total bycatch that would result from the observed fishing effort that year given the estimated BPUE(s)  
+
+```{r}
+bpue1 <- fread("data/bpue1.csv")
+```
+
 
 ```{r total bycatch, eval=FALSE}
 tot1 <- vector(mode = "list", length = nrow(bpue1))
