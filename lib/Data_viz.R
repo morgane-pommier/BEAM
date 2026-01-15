@@ -351,9 +351,11 @@ ggsave(Total_bycatch_estimated_BPUE_available_reason,file="Total_bycatch_estimat
 
 bpue <- data[bpue_available=="1", ]
 
+bpue[is.na(base_model_heterogeneity), base_model_heterogeneity := "NA"]
+
 bpue$base_model_heterogeneity <- factor(bpue$base_model_heterogeneity)
 
-levels(bpue$base_model_heterogeneity) <- c("NA", "No", "Yes")
+levels(bpue$base_model_heterogeneity) <- str_to_title(levels(bpue$base_model_heterogeneity))
 
 pie_data <- data.frame(
   group=levels(bpue$base_model_heterogeneity),
@@ -361,16 +363,22 @@ pie_data <- data.frame(
 )
 
 pie_data$group <- as.factor(pie_data$group)
-levels(pie_data$group) <- c("NA", "No", "Yes")
 
 pie <- ggplot(pie_data, aes(x="", y=value.Freq, fill=group)) +
   geom_bar(stat="identity", width=1, color="white", alpha = .7) +
   coord_polar("y", start=0) +
-  geom_text(aes(label = c("1%", "82.5%","16.5%" )),color=c("black", "white","white"),size=6,position = position_stack(vjust = 0.5))+
   theme_void() +labs(fill="Estimate Heterogeneity")+ scale_fill_manual(values=c("grey95","#3a86ff", "orange"))+theme(legend.position = "top")
 
+#9 possible random effects - maximum
 
-n_re <- ggplot(bpue) + geom_bar(aes(x=base_model_heterogeneity, fill=as.factor(n_re)), position = "fill", col="white", alpha=.7) + theme_minimal() +labs(x= "Base model heterogeneity", y="Relative frequency", fill= "Number of random effect")+theme(legend.position = "right") + scale_fill_manual(values=c("#3a86ff", "#ffba08", "#faa307", "#f48c06", "#e85d04", "#dc2f02", "#d00000"))+
+full_palette <- c("#3a86ff", "#ffba08", "#faa307", "#f48c06",
+                "#e85d04", "#dc2f02", "#d00000", "darkred", "black")
+
+n_levels <- length(unique(bpue$n_re)) #How many different number of random effect in the models ?
+
+my_palette <- full_palette[1:n_levels]
+
+n_re <- ggplot(bpue) + geom_bar(aes(x=str_to_title(factor(base_model_heterogeneity)), fill=as.factor(n_re)), position = "fill", col="white", alpha=.7) + theme_minimal() +labs(x= "Base model heterogeneity", y="Relative frequency", fill= "Number of random effect")+theme(legend.position = "right") + scale_fill_manual(values=my_palette)+
   guides(fill = guide_legend(title.position = "top"))
 
 
@@ -378,37 +386,57 @@ combined <- ggarrange(pie, n_re)
 
 ggsave(combined,file="results/Heterogeneity_and_random_effects.png", width = 210, height = 145, units = "mm")
 
-Re_ecoregion <- ggplot(bpue) + geom_bar(aes(x=ecoregion, fill=as.factor(n_re)), position = "stack", col="white", alpha=.7, width=.7) + theme_minimal() +labs(x= "", y="Relative frequency", fill= "Number of random effect")+theme(legend.position = "right") + scale_fill_manual(values=c("#3a86ff", "#ffba08", "#faa307", "#f48c06", "#e85d04", "#dc2f02", "#d00000"))+
+Re_ecoregion <- ggplot(bpue) + geom_bar(aes(x=ecoregion, fill=as.factor(n_re)), position = "stack", col="white", alpha=.7, width=.7) + theme_minimal() +labs(x= "", y="Relative frequency", fill= "Number of random effect")+theme(legend.position = "right") + scale_fill_manual(values=my_palette)+
   guides(fill = guide_legend(title.position = "top"))+coord_flip()+ scale_x_discrete(labels=str_to_title)
 
 ggsave(Re_ecoregion,file="results/N_random_effects_ecoregion.png", width = 210, height = 145, units = "mm")
 
 
-Re_metier <-ggplot(bpue) + geom_bar(aes(x=metierl4, fill=as.factor(n_re)), position = "stack", col="white", alpha=.7, width=.7) + theme_minimal() +labs(x= "", y="Relative frequency", fill= "Number of random effect")+theme(legend.position = "right") + scale_fill_manual(values=c("#3a86ff", "#ffba08", "#faa307", "#f48c06", "#e85d04", "#dc2f02", "#d00000"))+
+Re_metier <-ggplot(bpue) + geom_bar(aes(x=metierl4, fill=as.factor(n_re)), position = "stack", col="white", alpha=.7, width=.7) + theme_minimal() +labs(x= "", y="Relative frequency", fill= "Number of random effect")+theme(legend.position = "right") + scale_fill_manual(values=my_palette)+
   guides(fill = guide_legend(title.position = "top"))+coord_flip()+ scale_x_discrete(labels=str_to_upper)
 
 ggsave(Re_metier,file="results/N_random_effects_metier.png", width = 210, height = 145, units = "mm")
 
-Re_taxon <-ggplot(bpue) + geom_bar(aes(x=taxon, fill=as.factor(n_re)), position = "stack", col="white", alpha=.7, width=.7) + theme_minimal() +labs(x= "", y="Relative frequency", fill= "Number of random effect")+theme(legend.position = "right") + scale_fill_manual(values=c("#3a86ff", "#ffba08", "#faa307", "#f48c06", "#e85d04", "#dc2f02", "#d00000"))+
+Re_taxon <-ggplot(bpue) + geom_bar(aes(x=taxon, fill=as.factor(n_re)), position = "stack", col="white", alpha=.7, width=.7) + theme_minimal() +labs(x= "", y="Relative frequency", fill= "Number of random effect")+theme(legend.position = "right") + scale_fill_manual(values=my_palette)+
   guides(fill = guide_legend(title.position = "top"))+coord_flip()+ scale_x_discrete(labels=str_to_title)
 
 ggsave(Re_taxon,file="results/N_random_effects_taxon.png", width = 210, height = 145, units = "mm")
 
 
-
 # Barplot of variables being used as random effect, when base model showed heterogeneity or not
 
 long_data <- bpue %>%
-  pivot_longer(cols = c(vessellength_group, year, monitoringmethod, samplingprotocol, areacode, country, metierl5),names_to = "x_variable",values_to = "x_value")
+  pivot_longer(cols = c(vessellength_group, year, monitoringmethod, samplingprotocol, areacode, country, metierl5, quarter),names_to = "x_variable",values_to = "x_value")
 
 # New facet label names for supp variable
-supp.labs <- c("Base model heterogeneity = NA",  "Base model heterogeneity = No","Base model heterogeneity = Yes")
-names(supp.labs) <- c("NA", "No", "Yes")
 
-Random_effects <- ggplot(long_data, aes(x = x_variable, fill = x_value)) +
+supp.labs <- c(
+  "No"  = "No heterogeneity",
+  "Yes" = "Heterogeneity", 
+  "NA" = "NA"
+)
+
+facet_labeller <- ggplot2::as_labeller(supp.labs)
+
+
+x_labs <- c(
+  "areacode"            = "ICES Area Code",
+  "country"             = "Country",
+  "metierl5"            = "Metier L5",
+  "monitoringmethod"    = "Monitoring method",
+  "quarter"             = "Quarter",
+  "samplingprotocol"    = "Sampling protocol",
+  "vessellength_group"  = "Vessel Length Group",
+  "year"                = "Year"
+)
+
+
+Random_effects <- ggplot(long_data, aes(x = x_variable, fill = str_to_title(x_value))) +
   geom_bar(position="fill", alpha=.7) +
-  facet_wrap(~ base_model_heterogeneity, labeller = labeller(base_model_heterogeneity = supp.labs), nrow =3) +
+  facet_wrap(~ base_model_heterogeneity, labeller = facet_labeller, nrow =3) +
   labs(x = "", y = "Relative frequency", fill = "Variable used as a random effect in the final model") +
-  theme_minimal() + scale_fill_manual(values=c("#3a86ff", "orange"), labels = c("No", "Yes"))+theme(legend.position = "top")+ scale_x_discrete(labels=c('ICES Area Code', 'Country', 'Metier L5', "Monitoring method", "Sampling protocol", "Vessel Length Group", "Year"))
+  theme_minimal() + scale_fill_manual(values=c("#3a86ff", "orange"))+theme(legend.position = "top")+ scale_x_discrete(labels = x_labs)
+
 
 ggsave(Random_effects,file="results/Random_effect_prevalence.png", width = 210, height = 145, units = "mm")
+
