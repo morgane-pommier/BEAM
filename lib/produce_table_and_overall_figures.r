@@ -11,7 +11,7 @@ table2print<-merge(table2print,summaryall,by=c("ecoregion","metierl4","species")
 common_names <- fread("data/commonnames2024.csv")
 common_names$common <- tolower(common_names$common)
 common_names$taxon <- tolower(common_names$taxon)
-table2print[common_names,on = c("species"), taxa := i.taxon]
+table2print[obs3,on = c("species"), taxa := i.taxon] #Retreiving taxa info from obs3 instead of common_names table so the elasmobranchs are distinct from other fish
 table2print[common_names,on = c("species"), common := i.common]
 ###
 
@@ -147,18 +147,22 @@ save_as_html(
 
 #####
 
+#MP 13/01/2026 Redefined priority1, 2 and 3 using code form previous versions.
+priority1<-c("phocoena phocoena","delphinus delphis","monachus monachus")
+priority2<-"turtles"
+priority3<-c("angel shark", "common skate", "guitarfish", "maltese
+skate", "great white shark", "sand tiger shark", "smalltooth sand tiger shark",
+"spiny butterfly ray", "sturgeon", "balearic shearwater","sterlet")
 
 priority3<-paste(priority3,collapse="|")
-#grep(priority3,tolower(table.print$"Common name"))
 
 priorty1_tb<-table.print[table.print$Species%in%priority1&!is.na(table.print$"total bycatch 2023"),]
-priorty2_tb<-table.print[table.print$Taxon=="Turtles"&!is.na(table.print$"total bycatch 2023"),]
+priorty2_tb<-table.print[table.print$Taxon=="turtles"&!is.na(table.print$"total bycatch 2023"),]
 priorty3_tb<-table.print[grep(priority3,tolower(table.print$"Common name")),]
 priorty3_tb<-priorty3_tb[!is.na(priorty3_tb$"total bycatch 2023"),]
 
 priority_list<-rbind(priorty1_tb,priorty2_tb,priorty3_tb)
 priority_list<-priority_list[,-c(9,16)]
-
 
 ftp <- flextable(priority_list[order(priority_list$Ecoregion,priority_list$Taxon,priority_list$"metier L4",priority_list$Species),])
 ftp <-theme_vanilla(ftp)
@@ -173,8 +177,11 @@ save_as_docx(
 #### rate of achievement
 
 achieved<-subset(total_bycatch,!is.na(tot_mean))
-achieved$label<-paste(achieved$common,achieved$ecoregion,achieved$metierl4,sep=" and ")
+achieved$label<-paste(str_to_title(achieved$ecoregion),toupper(achieved$metierl4),achieved$common,sep=" and ") #Capitalized metier acronyms and moved species at the end of the label to match order in the plot captions below
 
+#MP 13/01/2026 
+#Adding a line to grab taxa information again, as the column does not currently exist in total_bycatch
+achieved[obs3,on = c("species"), taxa := i.taxon] #Retreiving taxa info from obs3 instead of common_names table so the elasmobranchs are distinct from other fish
 
 mammals<-ggplot(subset(achieved,taxa=="mammals"
 								#& 
@@ -184,11 +191,11 @@ mammals<-ggplot(subset(achieved,taxa=="mammals"
 								#label!="Gray Seal and baltic sea and gtr"
 								), #removing the few with unsensible CI
   aes(x = label, y=(tot_mean)),colour="white") +
-  geom_crossbar(aes(ymin = (tot_lwr), ymax = (tot_upr)), width = 0.5, fill = "light blue",fatten=0) +
+  geom_crossbar(aes(ymin = (tot_lwr), ymax = (tot_upr)), width = 0.5, fill = "light blue",fatten=0.5) + #increased fatten argument to 0.5 so the mean line is visible on the plot bars.
     
   coord_flip() +
   xlab("Ecoregion, Metier level 4, Species") + 
-  ylab("Total Bycatch (individuals)")+
+  ylab("Total Bycatch (individuals) - note that the axis is on a log scale")+
   theme_minimal()+
   scale_y_log10()
 
@@ -201,7 +208,7 @@ birds<-ggplot(subset(achieved,taxa=="seabirds"
 							  #label!="European Shag and adriatic sea and otb" 
 							  ), 
    aes(x = label, y=(tot_mean)),colour="white") +
-  geom_crossbar(aes(ymin = (tot_lwr), ymax = (tot_upr)), width = 0.5, fill = "light blue",fatten=0) +
+  geom_crossbar(aes(ymin = (tot_lwr), ymax = (tot_upr)), width = 0.5, fill = "light blue",fatten=0.5) +
    
   coord_flip() +
   xlab("Ecoregion, Metier level 4, Species") + 
@@ -212,10 +219,10 @@ birds<-ggplot(subset(achieved,taxa=="seabirds"
 
 reptiles<-ggplot(subset(achieved,taxa=="turtles"), 
     aes(x = label, y=(tot_mean)),colour="white") +
-  geom_crossbar(aes(ymin = (tot_lwr), ymax = (tot_upr)), width = 0.5, fill = "light blue",fatten=0) +
+  geom_crossbar(aes(ymin = (tot_lwr), ymax = (tot_upr)), width = 0.5, fill = "light blue",fatten=0.5) +
   coord_flip() +
   xlab("Ecoregion, Metier level 4, Species") + 
-  ylab("Total Bycatch (individuals)")+
+  ylab("Total Bycatch (individuals) - note that the axis is on a log scale")+
   theme_minimal()+
   scale_y_continuous(trans = "log10")
 
@@ -223,25 +230,23 @@ reptiles<-ggplot(subset(achieved,taxa=="turtles"),
 
 elasmo<-ggplot(subset(achieved,taxa=="elasmobranchs"&tot_upr<1000000&tot_lwr>0.001), 
     aes(x = label, y=(tot_mean)),colour="white") +
-  geom_crossbar(aes(ymin = (tot_lwr), ymax = (tot_upr)), width = 0.5, fill = "light blue",fatten=0) +
+  geom_crossbar(aes(ymin = (tot_lwr), ymax = (tot_upr)), width = 0.5, fill = "light blue",fatten=0.5) +
   coord_flip() +
   xlab("Ecoregion, Metier level 4, Species") + 
-  ylab("Total Bycatch (individuals)")+
+  ylab("Total Bycatch (individuals) - note that the axis is on a log scale")+
   theme_minimal()+
   scale_y_continuous(trans = "log10")
-
 
 
  fish<-ggplot(subset(achieved,taxa=="fish"&tot_upr<100000), 
    aes(x = label, y=(tot_mean)),colour="white") +
-  geom_crossbar(aes(ymin = (tot_lwr), ymax = (tot_upr)), width = 0.5, fill = "light blue",fatten=0) +
+  geom_crossbar(aes(ymin = (tot_lwr), ymax = (tot_upr)), width = 0.5, fill = "light blue",fatten=0.5) +
   coord_flip() +
   xlab("Ecoregion, Metier level 4, Species") + 
-  ylab("Total Bycatch (individuals)")+
+  ylab("Total Bycatch (individuals) - note that the axis is on a log scale")+
   theme_minimal()+
   scale_y_continuous(trans = "log10")
 
- 
 
 	
 png("results/totalbycatch_mammals.png",width=20,height=35,units="cm",res=200)
@@ -267,6 +272,7 @@ dev.off()
 png("results/totalbycatch_fish.png",width=20,height=35,units="cm",res=200)
 fish
 dev.off()
+
 
 
 

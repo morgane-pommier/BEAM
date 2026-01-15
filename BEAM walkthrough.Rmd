@@ -108,6 +108,7 @@ library(flextable) #not quite well built
 library(scales)
 library(countrycode)
 library(stringi)
+library(stringr)
 
 ```
 
@@ -683,9 +684,9 @@ we then merge this information back in the table which is then produced online a
 bpues_estimates$reliability2<-FALSE
 bpues_estimates$reliability2[bpues_estimates$delta<2&bpues_estimates$upper_factor_prop <= 25&bpues_estimates$lower_factor_prop <= 25]<-TRUE
 
-temp<-merge(table.print,bpues_estimates,by.x=c("Ecoregion","metier L4","Species"),by.y=c("Ecoregion","metier.L4","Species"),all.x=TRUE)
+temp<-merge(table.print,bpues_estimates,by.x=c("ecoregion","metierl4","species"),by.y=c("Ecoregion","metier L4","Species"),all.x=TRUE)
 
-#Adding the color flag at this point. Need to go through a TRUE/FALSE version of the reliability column, as below in the metier L5 / ICES area examples.
+#We are now adding a color flag based on a bivariate scale combining information on reliability and monitoring coverage. The color column contain the HEX code for plotting, and the flag_description column indicates what the color means (e.g. uncertain estimate and low monitoring, more reliable estimate and monitoring above satisfactory theshold...)
 
 table.print$reliability<-FALSE
 table.print$reliability[which(temp$reliability2==TRUE)]<-TRUE
@@ -698,6 +699,10 @@ table.print$reliability <- ifelse(
   "more reliable",
   "uncertain"
 )
+
+#We are also flagging species of bycatch relevance - assessed in BEAM - that are known to be commerically landed in some ecoregions.
+
+table.print <- add_landing_flag(table.print)
 
 fwrite(table.print,file="results/bpue_table_print.csv",na="NA")
 
@@ -836,5 +841,9 @@ knitr::include_graphics("results/totalbycatch_elasmobranchs_reliability_check_or
 ```{r, echo=FALSE, out.width="90%"}
 knitr::include_graphics("results/totalbycatch_fish_reliability_check_ordered.png")
 ```
+
+
+
+
 
 

@@ -177,6 +177,10 @@ bpues_estimates$factor <- exp(bpues_estimates$RMSE)
 
 # Estimate delta - breadth of the confidence interval
 
+setnames(bpues_estimates,
+         old = c("TB lower", "TB upper"),
+         new = c("TB.lower", "TB.upper"))                     
+
 bpues_estimates$TB.lower_log <- log10(bpues_estimates$TB.lower+1)
 bpues_estimates$TB.upper_log<-log10(bpues_estimates$TB.upper+1)
 bpues_estimates$delta<-bpues_estimates$TB.upper_log-bpues_estimates$TB.lower_log
@@ -214,3 +218,4 @@ bpues_estimates$reliability <- bpues_estimates$lower_factor_prop <= 25 & bpues_e
 
 # SAVE SOME THINGS
 fwrite(bpues_estimates, "results/bpue_table_print_reliability_subset.csv", na="NA")
+
