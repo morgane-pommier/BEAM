@@ -135,8 +135,13 @@ calc_bpue <- function(needle, cols = colnames(needle), min_re_obs = 2, dat, year
   
         })
         
-        # pick the best one
+        # pick the best one, unless there was no heterogeneity detected, in that case, keep base model
         candidates.converged <- candidates[which(sapply(candidates, class) != "character")]
+		if (isFALSE(ret$base_model_heterogeneity)) {
+
+  best_model <- base_model
+
+}	 else {				   
         scores <- sapply(candidates.converged, AIC)
         if (length(scores) > 1 & sum(!is.na(scores)) > 0) {
             best <- candidates.converged[[which.min(scores)]]
@@ -156,5 +161,6 @@ calc_bpue <- function(needle, cols = colnames(needle), min_re_obs = 2, dat, year
     return(ret)
     
 }
+
 
 
