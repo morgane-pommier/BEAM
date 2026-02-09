@@ -13,11 +13,13 @@
 #' @param obs data.table with observed (monitored) fishing effort data (e.g. for the last 5 years)
 #' @param all data.table with all (unobserved) fishing effort data, but only for the current year
 #' @param verbose Logical, passed on to predict_response. Set to FALSE if nrow(bpue) > 1.
+#' @param years vector with integers indicating years of assessment. 
+#' @param include.weights boolean indicator indicating whether observations from the five most recent years should have double weight as compared to older data. 
 #' @returns A data.table with all columns given in cols, and additional columns showing the model formula, bpue estimates, lower and upper confidence intervals, and a logical indicating model heterogeneity in the base model (I^2). See details.
 #' @seealso [calc_total()]
 #' @export
 
-calc_total <- function(bpue, cols = c("ecoregion", "metierl4", "species"), obs, allx, verbose = TRUE) {
+calc_total <- function(bpue, cols = c("ecoregion", "metierl4", "species"), obs, allx, verbose = TRUE, years=years, include.weights=FALSE) {
 
     # parallelization support
     if (nrow(bpue) > 1) {
@@ -25,7 +27,7 @@ calc_total <- function(bpue, cols = c("ecoregion", "metierl4", "species"), obs, 
                        .export = "calc_total", # <- not 100% sure this line is needed.
                        .final = rbindlist,
                        .packages = c("data.table", "glmmTMB", "emmeans", "ggeffects")) %dopar% {
-                           calc_total(bpue = bpue[i], cols = cols, obs = obs, allx = allx, verbose = FALSE)
+                           calc_total(bpue = bpue[i], cols = cols, obs = obs, allx = allx, verbose = FALSE, years=years, include.weights=FALSE)
                        }
         return(ret)
     }
@@ -37,6 +39,10 @@ calc_total <- function(bpue, cols = c("ecoregion", "metierl4", "species"), obs, 
     #obs[,(possible_re) := lapply(.SD, as.factor), .SDcols = possible_re]
     obs[,(cols) := lapply(.SD, as.factor), .SDcols = cols]
     obs[, logDAS := log(daysatsea)]
+    
+    # add observation weights to data(if monitoring within the last five years 
+    # use full weight, if older data weight observations half as strongly in the likelihood)
+    obs[, weights := ifelse(year >= (max(years)-4), 1, 0.5)] 
 
     ret <- bpue[, c(cols, "model"), with = FALSE]
     ret[, c("tot_mean", "tot_lwr", "tot_upr", "message", "fishing_effort") :=
@@ -59,34 +65,66 @@ calc_total <- function(bpue, cols = c("ecoregion", "metierl4", "species"), obs, 
     }
     
     # sum up total fishing effort per combination of all levels of the random effects
-    tot <- allx[bpue, on = cols[cols != "species"], .(das = sum(daysatseaf)), by = re]
-    tot[, logDAS := log(das)] # OUTI: Days at sea is on a log scale
+    tot <- allx[bpue, on = cols[cols != "species"], .(das_fishing = sum(daysatseaf), final_year = max(year)), by = re]
+    #tot[, logDAS := log(das)] # OUTI: Days at sea is on a log scale
     tot <- tot[complete.cases(tot)]
+    
     
     if (nrow(tot) == 0) {
         return(ret)
     }
     
     # don't generate estimates unless the levels of all random effects match 
-    # between monitored and total effort data
+    # between monitored and total effort data (NOTE!! There are cases where monitoring effort strata do not exist in the total effort stratas)
     if (any(sapply(re, function(re) !all(tot[[re]] %in% unique(obs[[re]]))))) {
         ret$message <- "levels for at least one random effect not ok"
         return(ret)
     }
     
-    best <- glmmTMB(formula = form, offset = logDAS, family = nbinom2, data = obs)
-
+    # Refit best model
+    if(isTRUE(include.weights)){
+    best <- glmmTMB(formula = form, offset = logDAS, family = nbinom2, data = obs, weights = weights)
+    } else {
+    best <- glmmTMB(formula = form, offset = logDAS, family = nbinom2, data = obs)  
+    }
+    
     if (re.n == 0) {
-
+      
+        tot_obs <- obs
+        tot_obs <- tot_obs[year==tot$final_year,
+                           .(das_monitoring = sum(daysatsea), 
+                           n_ind = sum(n_ind))]
+        
+        # join total fishing effort and monitored effort per random factor
+        tot[,names(tot_obs) := tot_obs]
+        tot <- tot[,das_no_monitoring := das_fishing - das_monitoring]
+        tot[, logDAS := log(das_no_monitoring)] # OUTI: Days at sea is on a log scale
+        
+        
         pred <- as.data.frame(emmeans(best, ~1, offset = tot$logDAS, type = "response"))
-        ret[, c("tot_mean", "tot_lwr", "tot_upr") := as.list(pred[, c("response", "asymp.LCL", "asymp.UCL")])]
-        ret$fishing_effort <- sum(tot$das)
+        ret[, c("tot_mean", "tot_lwr", "tot_upr") := as.list(pred[, c("response", "asymp.LCL", "asymp.UCL")] + tot$n_ind)]  # prediction for unmonitored fishing effort + observed bycatch in monitoring
+        ret$fishing_effort <- sum(tot$das_fishing) # retain total fishing effort or total unmonitored fishing effort?
         
     } else {
+              
+        # sum monitoring effort, and number of bycaught animals, per random factor for year = THISYEAR-1
+        tot_obs <- obs[,(re) := lapply(.SD, as.factor), .SDcols = re]
+        tot_obs <- tot_obs[year==unique(tot$final_year),
+                           .(das_monitoring = sum(daysatsea), 
+                           n_ind = sum(n_ind)), 
+                           by = re]
         
         tot[, (re) := lapply(.SD, as.factor), .SDcols = re] # Do we treat YEAR correctly here? or does year need to be exempted?
-		# tot only has THISYEAR-1 data so if year %in% re then we only predict for THISYEAR-1
+        # tot only has THISYEAR-1 data so if year %in% re then we only predict for THISYEAR-1
         
+        # join total fishing effort and monitored effort 
+        tot <- tot_obs[tot, on=re]
+        tot[is.na(das_monitoring), das_monitoring := 0] # replace na with 0
+        tot[is.na(n_ind), n_ind := 0] # replace na with 0
+        tot <- tot[,das_no_monitoring := das_fishing - das_monitoring] #
+        tot[, logDAS := log(das_no_monitoring)] # OUTI: Days at sea is on a log scale
+      
+
         pred <- lapply(1:nrow(tot), function(i) {
           type_arg <- ifelse(packageVersion("ggeffects") >= "2.0.0", "random", "re")
            
@@ -103,8 +141,8 @@ calc_total <- function(bpue, cols = c("ecoregion", "metierl4", "species"), obs, 
                        upr = ifelse(!is.null(p[["conf.high"]]), p[["conf.high"]], NA_real_))
         }) |> rbindlist()
 
-        ret[, c("tot_mean", "tot_lwr", "tot_upr") := as.list(colSums(pred))]
-        ret$fishing_effort <- sum(tot$das)
+        ret[, c("tot_mean", "tot_lwr", "tot_upr") := as.list(colSums(pred) + sum(tot$n_ind))] # prediction for unmonitored fishing effort + observed bycatch in monitoring
+        ret$fishing_effort <- sum(tot$das_fishing) # retain total fishing effort or total unmonitored fishing effort?
         
     }
     
