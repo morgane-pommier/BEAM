@@ -139,14 +139,15 @@ calc_bpue <- function(needle, cols = colnames(needle), min_re_obs = 2, dat, year
         candidates.converged <- candidates[which(sapply(candidates, class) != "character")]
 		if (isFALSE(ret$base_model_heterogeneity)) {
 
-  best_model <- base_model
+  		best_model <- base_model
 
-}	 else {				   
+		}	 else {				   
         scores <- sapply(candidates.converged, AIC)
         if (length(scores) > 1 & sum(!is.na(scores)) > 0) {
             best <- candidates.converged[[which.min(scores)]]
         }
     }
+	}
     
     if (class(best) != "character") {
         bpue.r <- as.data.frame(emmeans(best, ~1, type="response", offset = log(1))) # BPUE for one DaS we can push to total effort prediction instead next
@@ -161,6 +162,7 @@ calc_bpue <- function(needle, cols = colnames(needle), min_re_obs = 2, dat, year
     return(ret)
     
 }
+
 
 
 
