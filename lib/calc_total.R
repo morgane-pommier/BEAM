@@ -64,6 +64,13 @@ calc_total <- function(bpue, cols = c("ecoregion", "metierl4", "species"), obs, 
         return(ret)
     }
     
+    # don't try to generate total estimates for models with unexplained heterogeneity (base_model_heterogeneity = TRUE but best model is n_ind~1)
+    if (re.n == 0 && isTRUE(bpue$base_model_heterogeneity)) {
+      ret$message <- "unable to explain heterogeneity with candidate random effects"
+      return(ret)
+    }
+    
+    
     # sum up total fishing effort per combination of all levels of the random effects
     tot <- allx[bpue, on = cols[cols != "species"], .(das_fishing = sum(daysatseaf), final_year = max(year)), by = re]
     #tot[, logDAS := log(das)] # OUTI: Days at sea is on a log scale
@@ -148,3 +155,4 @@ calc_total <- function(bpue, cols = c("ecoregion", "metierl4", "species"), obs, 
     
     return(ret)
 }
+
