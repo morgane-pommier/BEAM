@@ -529,7 +529,10 @@ this creates total_bycatch with this information and saved as total_bycatch_QCs.
 ```{r QC,eval=FALSE}
 tot2<-tot1
 source("lib/QCs_TotalBycatch.R")
-fwrite(total_bycatch, "final_beam_table.csv",na="NA")
+source("lib/add_qc123.R")
+total_bycatch <- add_qc123(tot = tot1, obs = obs3, all = all2, cols = c("ecoregion", "year", "country", "metierl4", "metierl5"), year = (year(Sys.Date())-1))
+fwrite(total_bycatch, "data/final_beam_table.csv",na="NA")
+
 
 ```
 
