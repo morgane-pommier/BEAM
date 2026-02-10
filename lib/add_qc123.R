@@ -24,7 +24,112 @@
 #' @param cols The columns specified when running `calc_bpue`. 
 #' @returns A data.table, i.e. a copy of `tot`, with new columns for QC1, QC2 and QC3.
 #' @seealso [calc_total()]
+#' @export#' Final quality checks and colour coding
+#' 
+#' @description
+#' `add_qc123` Adds columns QC1, QC2 and QC3 to the provided data.table.
+#' 
+#' @details
+#' QC1: Observed vs. total effort makes sense
+#'      - green = fishing effort <= monitoring effort for all vessel categories
+#'      - red = monitoring effort > fishing effort for one or more vessel categories
+#'      
+#' QC2: Data availability for total bycatch estimation
+#'      - green = there is both monitoring effort and total effort for all vessel categories
+#'      - yellow = there is monitoring effort, but no total effort for one or more vessel categories
+#'      - red = there is neither monitoring effort, nor total effort for one or more vessel categories
+#'  
+#' QC3: Availability of levels of random effects (REs) that are part of the model
+#'      - green = there is data for all levels of all REs, if the model uses any REs
+#'      - yellow = some levels lack data, but the only RE is year
+#'      - red = there is no data for one or more levels of at least one RE
+#'       
+#' @param tot The data.table to be annotated; i.e. the result of a call to `calc_total()`.
+#' @param obs A data.table containing all observed fishing effort, usually `obs2`
+#' @param all A data.table containing all fishing effort, usually `all2`.
+#' @param cols The columns specified when running `calc_bpue`. 
+#' @param year_ass The year to be assessed with the QCs. Numeric.
+#' @returns A data.table, i.e. a copy of `tot`, with new columns for QC1, QC2 and QC3.
+#' @seealso [calc_total()]
 #' @export
+#' @example
+#' Read data:
+#' tot <- fread("data/tot1.csv")
+#' obs3 <- fread("data/obs3.csv)
+#' all2 <- fread("data/all2.csv")
+#' Run QC checks:
+#' tot2 <- add_qc(tot = tot, obs = obs3, all = all2, cols = c("ecoregion", "year",
+#' "country", "metierl4", "metierl5", year_ass = 2023)
+
+add_qc123 <- function(tot, obs, all, cols, year_ass) {
+  
+  # aggregate data on the columns specified, AND the vessellength column.
+  # why do we also split by vessellength?
+  # this was discussed during a plenary session at WGBYC 2023. The consensus then 
+  # was that including vessellength was a more precautionary approach, since 
+  # pooling data from different vessel length groups may not be appropriate.
+  
+  # calculate das for both dataset per groupping
+  qc_obs <- obs[, .(das = sum(daysatsea)), c(cols, "vessellength_group")]
+  qc_all <- all[, .(das = sum(daysatseaf)), c(cols, "vessellength_group")]
+  # merge
+  qc <- merge(qc_obs, qc_all, by = c(cols, "vessellength_group"), all = TRUE, suffixes = c("_obs", "_all"))
+  qc <- qc[!is.na(vessellength_group)] # ignore NAs for now.
+  qc[is.na(das_obs), das_obs := 0]
+  qc[is.na(das_all), das_all := 0]
+  
+  tot <- copy(tot)
+  # these default values come out this way (red, red, green) because of the 
+  # logic in the following code
+  tot[, c("QC1", "QC2", "QC3") := list("red", "red", "green")]
+  
+  # QC1 - MONITORING EFFORT VS FISHING EFFORT -------------------------------
+  # More monitoring effort than fishing effort (*if dbsg was done correctly this should not be a problem)
+  # Could happen that when there are simultaneous monitoring (e.g., EM and SO)
+  # Green = fishing effort >= monitoring effort
+  # Red = fishing effort < monitoring effort 
+  qc[, QC1 := ifelse(all(das_obs <= das_all), "green", "red"), cols]
+  
+  # keep only data for the year of assessment
+  if("year" %in% cols){qc1_summary <- qc[year %in% year_ass][, year := NULL]}
+  # tot has less columns than qc, so we need to summarize qc to match tot
+  qc1_summary <- qc1_summary[, .(QC1 = ifelse(any(QC1 == "red"), "red", "green")), by = .(ecoregion, metierl4)]
+  
+  # summarize QC1 to match tot cols -> summarize results per grouping columns (ecoregion, metierl4)
+  tot[qc1_summary, on = c("ecoregion", "metierl4"), QC1 := i.QC1]
+  #tot[qc, on = cols, QC1 := i.QC1]
+  
+  # QC2 - DATA AVAILABILITY FOR TOTAL BYCATCH ESTIMATION --------------------
+  # Data availability to calculate total BPUE by ecoregion, metier lvl 4 and species
+  # Green = if there is both monitoring effort and total fishing effort
+  # Yellow = if there is NO fishing effort but YES monitoring effort
+  # Red = if there is NO monitoring effort and NO total fishing effort
+  qc[, QC2 := ifelse(all(das_obs > 0 & das_all > 0), "green", "yellow"), cols]
+  qc[, QC2 := ifelse(all(das_obs == 0 & das_all == 0), "red", QC2), cols]
+  
+  # keep only data for the year of assessment
+  if("year" %in% cols){qc2_summary <- qc[year %in% year_ass][, year := NULL]}
+  # summarize QC2 to match tot cols -> summarize results per grouping columns (ecoregion, metierl4)
+  qc2_summary <- qc[, .(QC2 = ifelse(any(QC2 == "red"), "red",
+                                     ifelse(any(QC2 == "yellow"), "yellow", "green"))), by = .(ecoregion, metierl4)]
+  tot[qc2_summary, on = c("ecoregion", "metierl4"), QC2 := i.QC2]
+  
+  # QC3 - FACTORS INFLUENCING BPUE (RE RETAINED IN THE MODEL) ---------------
+  # Factors influencing BPUE (random effects retained in the model)
+  # If there is any factor influencing BPUE, do 
+  #   we have all the levels of the effect (e.g., no BPUE for one country)?
+  # Green = yes, all levels of the factor retained are available
+  # Yellow = not all levels available, but random effect is year
+  # Red = no, no all levels of the factor are available (except when the RE is year) OR
+  #   sampling protocol does not match monitoring method
+  # *tb.message reflects this
+  tot[message == "random levels for at least one random effect not ok" & model == "n_ind ~ 1 + (1 | year)", QC3 := "yellow"]
+  tot[message == "random levels for at least one random effect not ok" | 
+        (message == "samplingProtocol or monitoringMethod not ok" & model != "n_ind ~ 1 + (1 | year)"), QC3 := "red"]
+  
+  tot
+}
+
 #' @example
 #' Read data:
 #' tot <- fread("data/tot.csv")
