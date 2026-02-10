@@ -533,7 +533,7 @@ source("lib/add_qc123.R")
 total_bycatch <- add_qc123(tot = tot1, obs = obs3, all = all2, cols = c("ecoregion", "year", "country", "metierl4", "metierl5"), year = (year(Sys.Date())-1))
 fwrite(total_bycatch, "data/final_beam_table.csv",na="NA")
 
-
+tjor
 ```
 
 
