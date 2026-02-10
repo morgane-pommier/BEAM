@@ -136,16 +136,29 @@ obs3[species %in% c("apristurus", "centroselachus crepidater", "deania calceus",
 
 #MP: Just run this one (already existed, just generating the taxon column differently)
 
+#General rule
 obs3[,
     taxon_bycatch_monitor_ok := (taxa_monitored %in% c("all","elasmobranchs~seabirds~mammals", "protectedspecies")) | (taxa_monitored == taxon)
 ]
 
-obs3[taxon == "elasmobranchs" & taxa_monitored == "fish",
-     taxon_bycatch_monitor_ok := TRUE] #Taxon monitored is okay if fish was the protocol and they reported elasmobranchs
+#Adding exceptions to fix case by case issues
 
-obs3[taxon == "fish" & taxa_monitored == "elasmobranchs~seabirds~mammals",
-     taxon_bycatch_monitor_ok := FALSE] #Taxon monitored is not okay if fish were reported under elasmobranchs~seabirds~mammals
+#Taxon monitored is okay if fish was the protocol and they reported elasmobranchs
+obs3[taxon == "elasmobranchs" & taxa_monitored == "fish",taxon_bycatch_monitor_ok := TRUE] 
+
+#Taxon monitored is not okay if teleost fish were reported under elasmobranchs~seabirds~mammals
+obs3[taxon == "fish" & taxa_monitored == "elasmobranchs~seabirds~mammals", taxon_bycatch_monitor_ok := FALSE] 
+
+ #We consider EM data only for mammals and seabirds, unless it's UK data, since we know they monitor all ETP species 
+obs3[monitoringmethod == "em" & country != "gbr" & !(taxon %in% c("mammals", "seabirds")),taxon_bycatch_monitor_ok := FALSE]
+
+#France only monitors mammals with EM
+obs3[country == "fra" & monitoringmethod == "em" & !(taxon %in% "mammals"),taxon_bycatch_monitor_ok := FALSE]
+ 
+#Note: At the moment those exceptions are overriding one another in that specific order, intentionally, as a case by case fix. We may want to double check protocol with data providers, so taxa_monitored reflects correctly what EM is used for or not. 
+#For instance, is should not be possible to have "all" under the taxa_monitored column if the monitoring method was EM and it's only covering mammals.
 
 fwrite(obs3, "data/obs3.csv",na="NA") # previously monitor_effort_bycatch_ecoregion_area_species.csv
+
 
 ########################################## 15Sept2025 DL
