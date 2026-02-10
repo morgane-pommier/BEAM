@@ -3,8 +3,8 @@ title: "BEAM walkthrough - WKBBEAM 1 Dec 2025"
 author: "WGBYC ToR C"
 date: "2025-12-05"
 output:
-  html_document: default
   word_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -127,8 +127,8 @@ There you will generate a token which you need to copy and paste in the object b
 do note the username: it should be the email (eg louis.attack@dartmouth.edu) you used to make the access request  
 
 ```{r load credentials,  eval=FALSE}
-ices_username <- "torbjorn.saterberg@slu.se"
-token<-"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoidG9yYmpvcm4uc2F0ZXJiZXJnQHNsdS5zZSIsImp0aSI6IjMzN2E5MDBiLWM1N2MtNGRhMy1iNTI3LTE5ZDU2MmFlNjZjZiIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL2VtYWlsYWRkcmVzcyI6InRvcmJqb3JuLnNhdGVyYmVyZ0BzbHUuc2UiLCJVc2VyRW1haWwiOiJ0b3Jiam9ybi5zYXRlcmJlcmdAc2x1LnNlIiwiRW1haWwiOiJ0b3Jiam9ybi5zYXRlcmJlcmdAc2x1LnNlIiwiZXhwIjoxNzY3MTkzNDM2LCJpc3MiOiJodHRwOi8vdGFmLmljZXMuZGsiLCJhdWQiOiJodHRwOi8vdGFmLmljZXMuZGsifQ.s-jw7LwCMfuqPHYWNuJN--eNjUgIkM8PmldPUFU-KBE"
+ices_username <- ""
+token<-""
 
 ```
 
@@ -387,7 +387,7 @@ fwrite(bpue2, file = "data/bpue2.csv", sep = ";",na="NA")
 
 we then attempt to predict the total bycatch that would result from the observed fishing effort that year given the estimated BPUE(s)  
 
-```{r}
+```{r, eval=FALSE}
 bpue1 <- fread("data/bpue1.csv")
 ```
 
@@ -815,35 +815,35 @@ last we plot the total bycatch estimates for species x ecoregion x metier level 
 
 
 ## mammals retained post reliability checks  
-```{r, echo=FALSE, out.width="90%"}
+```{r, eval=FALSE, echo=FALSE, out.width="90%"}
 knitr::include_graphics("results/totalbycatch_mammals_reliability_check_ordered.png")
 ```
   
   
   
 ## birds retained post reliability checks  
-```{r, echo=FALSE, out.width="90%"}
+```{r, eval=FALSE, echo=FALSE, out.width="90%"}
 knitr::include_graphics("results/totalbycatch_seabirds_reliability_check_ordered.png")
 ```
   
   
     
 ## turtles retained post reliability checks  
-```{r, echo=FALSE, out.width="90%"}
+```{r, eval=FALSE, echo=FALSE, out.width="90%"}
 knitr::include_graphics("results/totalbycatch_turtles_reliability_check_ordered.png")
 ```
   
     
     
 ## elasmobranchs retained post reliability checks  
-```{r, echo=FALSE, out.width="90%"}
+```{r, eval=FALSE, echo=FALSE, out.width="90%"}
 knitr::include_graphics("results/totalbycatch_elasmobranchs_reliability_check_ordered.png")
 ```
   
   
  
 ## fish retained post reliability checks  
-```{r, echo=FALSE, out.width="90%"}
+```{r, eval=FALSE, echo=FALSE, out.width="90%"}
 knitr::include_graphics("results/totalbycatch_fish_reliability_check_ordered.png")
 ```
 
